@@ -1,0 +1,20 @@
+{
+  "name": "opslink-domains",
+  "version": "1.0.0",
+  "description": "OpsLink Domains – A Division of OpsLink Systems. Secure, enterprise-grade domain and DNS management platform.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js",
+    "build": "echo 'Static build handled by Vercel'"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "author": "OpsLink Systems"
+}

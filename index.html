@@ -2,596 +2,172 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OpsLink Domains – Secure Domain & DNS Management</title>
+  <title>OpsLink Domains – A Division of OpsLink Systems</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Register and manage domains with OpsLink Domains – secure, professional domain and DNS management powered by OpsLink Systems." />
+  <meta name="description" content="OpsLink Domains, a division of OpsLink Systems, provides secure, enterprise-grade domain and DNS management for modern infrastructure teams." />
   <link rel="icon" href="https://opslinkcad.com/assets/OpsLinkLogo.png" />
 
   <style>
     :root {
-      --bg: #050812;
-      --bg-soft: #070c18;
-      --card: rgba(11,18,32,0.95);
-      --card-soft: rgba(13,20,37,0.9);
-      --border: rgba(148,163,184,0.35);
+      --bg-main: #060a12;
+      --bg-soft: #0b111c;
+      --card: rgba(16, 23, 40, 0.9);
+      --card-soft: rgba(19, 28, 48, 0.9);
+      --border: rgba(148, 163, 184, 0.5);
       --accent: #4e8cff;
-      --accent2: #2563eb;
       --accent-soft: #7fa4ff;
-      --accent-green: #22c55e;
-      --text: #e5eaf7;
+      --text: #e5e9f5;
       --muted: #9ca3af;
-      --danger: #f97373;
-
       --radius-lg: 18px;
       --radius-md: 12px;
       --radius-pill: 999px;
-      --shadow: 0 18px 50px rgba(0,0,0,0.55);
+      --shadow-soft: 0 18px 50px rgba(0, 0, 0, 0.45);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
 
     body {
       min-height: 100vh;
-      background:
-        radial-gradient(circle at 0% 0%, #0f172a 0, transparent 55%),
-        radial-gradient(circle at 100% 100%, #020617 0, transparent 55%),
-        #050812;
+      background: radial-gradient(circle at 20% 0%, #111827 0, transparent 55%), radial-gradient(circle at 100% 100%, #020617 0, transparent 60%), #060a12;
       color: var(--text);
       overflow-x: hidden;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
-    /* ========= NAVBAR ========= */
     header {
       position: sticky;
       top: 0;
       z-index: 20;
-      background: rgba(4,7,15,0.86);
+      background: rgba(6, 10, 18, 0.85);
       backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(148,163,184,0.25);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.35);
     }
 
     .nav {
       max-width: 1120px;
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
     }
 
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .nav-left { display: flex; align-items: center; gap: 10px; }
     .logo-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 14px;
+      width: 32px; height: 32px; border-radius: 12px;
       background: linear-gradient(135deg, #4e8cff, #2563eb);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 18px rgba(78,140,255,0.7);
-      font-weight: 800;
-      color: #f9fafb;
-      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 16px; color: #f9fafb;
+      box-shadow: 0 0 12px rgba(78, 140, 255, 0.65);
     }
 
-    .brand-text-main {
-      font-size: 17px;
-      font-weight: 600;
-    }
+    .brand-text-main { font-size: 17px; font-weight: 600; letter-spacing: 0.04em; }
+    .brand-text-sub { font-size: 11px; color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
 
-    .brand-text-sub {
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 18px;
-      font-size: 14px;
-    }
-
-    .nav-links a {
+    .nav-middle { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+    .nav-middle a {
       color: var(--muted);
       position: relative;
       padding-bottom: 2px;
-      transition: color .18s ease;
+      transition: color 0.18s ease;
     }
-
-    .nav-links a::after {
+    .nav-middle a::after {
       content: "";
       position: absolute;
-      left: 0;
-      bottom: -3px;
-      width: 0;
-      height: 2px;
+      left: 0; bottom: -3px;
+      width: 0; height: 2px;
       border-radius: 999px;
       background: linear-gradient(90deg, var(--accent), var(--accent-soft));
-      transition: width .2s ease;
+      transition: width 0.2s ease;
     }
+    .nav-middle a:hover { color: var(--accent-soft); }
+    .nav-middle a:hover::after { width: 100%; }
 
-    .nav-links a:hover {
-      color: var(--accent-soft);
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .btn-ghost {
+      border-radius: var(--radius-pill); padding: 7px 14px;
+      font-size: 13px; border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(9, 13, 23, 0.9); color: var(--text);
+      cursor: pointer; transition: background 0.16s, transform 0.16s;
     }
-
-    .nav-links a:hover::after {
-      width: 100%;
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .pill-muted {
-      border-radius: var(--radius-pill);
-      padding: 6px 11px;
-      font-size: 11px;
-      border: 1px solid rgba(148,163,184,0.5);
-      color: var(--muted);
-      background: rgba(10,16,30,0.9);
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-    }
-
+    .btn-ghost:hover { background: rgba(15, 23, 42, 0.95); transform: translateY(-1px); }
     .btn-primary {
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 9px 16px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #f9fafb;
-      box-shadow: 0 0 16px rgba(37,99,235,0.65);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+      border-radius: var(--radius-pill); padding: 8px 16px;
+      font-size: 13px; font-weight: 600; border: none;
+      background: linear-gradient(135deg, #4e8cff, #2563eb);
+      color: #f9fafb; box-shadow: 0 0 16px rgba(37, 99, 235, 0.7);
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: transform 0.16s ease, box-shadow 0.16s ease;
     }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 22px rgba(37, 99, 235, 0.85); }
 
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.06);
-      box-shadow: 0 0 22px rgba(37,99,235,0.85);
-    }
+    .page { max-width: 1120px; margin: 0 auto; padding: 40px 24px 60px; }
 
-    /* ========= LAYOUT ========= */
-    .page {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 40px 24px 60px;
-    }
-
+    /* HERO */
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-      gap: 32px;
-      align-items: center;
-      margin-top: 18px;
-      margin-bottom: 56px;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+      gap: 32px; align-items: center; margin-top: 20px; margin-bottom: 56px;
     }
 
-    .hero-left-kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 3px 9px 3px 3px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.5);
-      background: radial-gradient(circle at 0 0, rgba(78,140,255,0.25), rgba(8,13,26,0.96));
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 14px;
+    .hero-kicker {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--muted);
+      border-radius: var(--radius-pill); padding: 4px 10px;
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(12, 18, 32, 0.9); margin-bottom: 14px;
     }
 
-    .hero-left-kicker span.label {
-      border-radius: var(--radius-pill);
-      padding: 3px 10px;
-      background: rgba(7,12,24,0.98);
-      border: 1px solid rgba(96,165,250,0.8);
-      color: var(--accent-soft);
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      font-weight: 600;
-      font-size: 10px;
+    .hero-kicker span.dot {
+      width: 7px; height: 7px; border-radius: 999px;
+      background: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
     }
 
-    .hero-title {
-      font-size: clamp(32px, 4vw, 42px);
-      line-height: 1.1;
-      margin-bottom: 14px;
-      font-weight: 750;
-      letter-spacing: 0.04em;
+    .hero-title { font-size: clamp(32px, 4vw, 42px); line-height: 1.1; font-weight: 750; letter-spacing: 0.04em; margin-bottom: 16px; }
+    .hero-title span { background: linear-gradient(120deg, #93c5fd, #4e8cff, #22c55e); -webkit-background-clip: text; color: transparent; }
+    .hero-subtitle { font-size: 14px; color: var(--muted); max-width: 500px; line-height: 1.7; margin-bottom: 18px; }
+    .hero-tagline { font-size: 13px; color: #cbd5f5; max-width: 520px; line-height: 1.6; margin-bottom: 22px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+
+    /* Domain Search Box */
+    .domain-search-container {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(6px);
     }
 
-    .hero-title span {
-      background: linear-gradient(120deg, #93c5fd, #4e8cff, #22c55e);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-
-    .hero-subtitle {
-      font-size: 14px;
-      color: var(--muted);
-      max-width: 460px;
-      line-height: 1.7;
-      margin-bottom: 20px;
-    }
-
-    .hero-meta-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-
-    .meta-pill {
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(8,13,24,0.95);
-      padding: 5px 10px;
-      font-size: 11px;
-      color: var(--muted);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .meta-pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent-green);
-      box-shadow: 0 0 0 5px rgba(34,197,94,0.3);
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .hero-footnote {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* ========= DOMAIN CARD ========= */
+    /* Right Card */
     .hero-card {
-      border-radius: 22px;
-      background:
-        radial-gradient(circle at 0 0, rgba(78,140,255,0.2), transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(34,197,94,0.16), transparent 60%),
-        var(--card);
-      border: 1px solid rgba(148,163,184,0.55);
-      padding: 22px 20px 18px;
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
+      border-radius: 20px;
+      background: radial-gradient(circle at 0 0, rgba(148, 163, 184, 0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(37, 99, 235, 0.14), transparent 60%), var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 18px 16px;
     }
 
-    .hero-card::before {
-      content: "";
-      position: absolute;
-      inset: -100px;
-      background: linear-gradient(135deg, rgba(148,163,184,0.08), transparent, transparent);
-      opacity: 0.5;
-      pointer-events: none;
-    }
+    .hero-card-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; }
+    .hero-card-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
 
-    .hero-card-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 14px;
-    }
-
-    .hero-card-title {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .hero-card-sub {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    .hero-card-tag {
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(148,163,184,0.7);
-      background: rgba(7,11,22,0.98);
-      color: var(--muted);
-    }
-
-    .domain-form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: stretch;
-    }
-
-    .domain-input-wrap {
-      flex: 1;
-      position: relative;
-    }
-
-    .domain-input-wrap input {
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.7);
-      background: rgba(7,12,24,0.96);
-      padding: 11px 16px 11px 40px;
-      color: var(--text);
-      font-size: 14px;
-      outline: none;
-      box-shadow: 0 0 0 1px rgba(15,23,42,0.6);
-    }
-
-    .domain-input-wrap input::placeholder {
-      color: #6b7280;
-    }
-
-    .domain-input-icon {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 15px;
-      color: var(--accent-soft);
-    }
-
-    .btn-check {
-      border-radius: 999px;
-      border: none;
-      padding: 0 22px;
-      min-width: 96px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #f9fafb;
-      box-shadow: 0 0 18px rgba(37,99,235,0.6);
-      transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
-    }
-
-    .btn-check:hover {
-      transform: translateY(-1px);
-      filter: brightness(1.07);
-      box-shadow: 0 0 24px rgba(37,99,235,0.8);
-    }
-
-    .btn-check[disabled] {
-      opacity: 0.65;
-      cursor: wait;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .domain-status {
-      margin-top: 11px;
-      font-size: 12px;
-      color: var(--muted);
-      min-height: 20px;
-    }
-
-    .status-ok { color: var(--accent-green); }
-    .status-bad { color: var(--danger); }
-    .status-neutral { color: var(--muted); }
-
-    .domain-tlds {
-      margin-top: 14px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tld-chip {
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.55);
-      background: rgba(9,13,26,0.96);
-      padding: 6px 11px;
-      font-size: 11px;
-      display: inline-flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-
-    .tld-chip span.tld {
-      font-weight: 600;
-    }
-
-    .tld-chip span.price {
-      color: var(--accent-green);
-    }
-
-    /* ========= PRICING PREVIEW ========= */
-    .section {
-      margin-bottom: 42px;
-    }
-
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .section-title {
-      font-size: 18px;
-      font-weight: 650;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .section-subtitle {
-      font-size: 13px;
-      color: var(--muted);
-      max-width: 420px;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .pricing-card {
-      background: var(--card-soft);
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(148,163,184,0.4);
-      padding: 14px 14px 12px;
-      font-size: 12px;
-      position: relative;
-      overflow: hidden;
-      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
-    }
-
-    .pricing-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 34px rgba(0,0,0,0.55);
-      border-color: rgba(148,163,184,0.7);
-    }
-
-    .pricing-name {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    .pricing-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: var(--radius-pill);
-      font-size: 10px;
-      background: rgba(37,99,235,0.18);
-      color: #bfdbfe;
-      margin-bottom: 6px;
-    }
-
-    .pricing-price {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: var(--accent-green);
-    }
-
-    .pricing-price span.cur {
-      font-size: 12px;
-      opacity: 0.85;
-      color: var(--muted);
-    }
-
-    .pricing-note {
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    /* ========= FOOTER ========= */
     footer {
-      border-top: 1px solid rgba(148,163,184,0.25);
-      padding: 20px 24px 26px;
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 32px;
+      border-top: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 18px 24px 24px; font-size: 11px; color: var(--muted);
+      margin-top: 20px;
     }
 
-    .footer-inner {
-      max-width: 1120px;
-      margin: 0 auto;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
+    .footer-inner { max-width: 1120px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+    .footer-links { display: flex; gap: 12px; }
+    .footer-links a:hover { color: var(--accent-soft); }
 
-    .footer-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .footer-links a {
-      color: var(--muted);
-    }
-
-    .footer-links a:hover {
-      color: var(--accent-soft);
-    }
-
-    /* ========= RESPONSIVE ========= */
-    @media (max-width: 880px) {
-      .hero {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .hero-card {
-        order: -1;
-      }
-      .nav-links {
-        display: none;
-      }
-      .nav {
-        padding-inline: 16px;
-      }
-      .page {
-        padding-inline: 16px;
-      }
-      .pricing-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 640px) {
-      .hero {
-        margin-top: 10px;
-      }
-      .hero-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .domain-form {
-        flex-direction: column;
-      }
-      .btn-check {
-        width: 100%;
-      }
-      .pricing-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-card { order: -1; margin-bottom: 10px; }
+      .nav-middle { display: none; }
     }
   </style>
 </head>
@@ -602,198 +178,70 @@
         <div class="logo-mark">OD</div>
         <div>
           <div class="brand-text-main">OpsLink Domains</div>
-          <div class="brand-text-sub">OpsLink Systems • Domain Network</div>
+          <div class="brand-text-sub">A Division of OpsLink Systems</div>
         </div>
       </div>
 
-      <nav class="nav-links">
-        <a href="#search">Search</a>
-        <a href="#pricing">Pricing</a>
-        <a href="https://opslinkcad.com" target="_blank">OpsLink Platform</a>
+      <nav class="nav-middle">
+        <a href="/pricing.html">Pricing</a>
+        <a href="/dns.html">DNS</a>
+        <a href="https://hosting.opslinkcad.com" target="_blank">Hosting</a>
+        <a href="https://opslinkcad.com/about.html" target="_blank">About</a>
       </nav>
 
       <div class="nav-right">
-        <div class="pill-muted">Domain & DNS Management</div>
-        <a href="https://domains.opslinkcad.com/client-area" class="btn-primary">
-          Client Area
-        </a>
+        <div id="auth-buttons" style="display:flex; gap:8px;">
+          <a href="/auth/register.html" class="btn-ghost">Register</a>
+          <a href="/auth/login.html" class="btn-primary"><span class="icon">↪</span> Login</a>
+        </div>
+        <a id="client-area" href="/dashboard.html" class="btn-primary" style="display:none;"><span class="icon">☰</span> Client Area</a>
       </div>
     </div>
   </header>
 
   <main class="page">
-    <!-- HERO -->
-    <section class="hero" id="search">
+    <section class="hero">
       <div>
-        <div class="hero-left-kicker">
-          <span class="label">New</span>
-          <span>Dedicated domain layer, aligned with OpsLink Hosting.</span>
+        <div class="hero-kicker"><span class="dot"></span> OpsLink Domains • Enterprise Infrastructure</div>
+
+        <h1 class="hero-title">Enterprise-grade <span>domain & DNS</span> for modern infrastructure.</h1>
+        <p class="hero-subtitle">OpsLink Domains is the dedicated domain and DNS layer in the OpsLink ecosystem, designed for teams that treat naming and availability as production-critical.</p>
+        <p class="hero-tagline">Empowering modern infrastructure with secure, scalable domain and DNS management — backed by the reliability and standards of OpsLink Systems.</p>
+
+        <!-- LIVE DOMAIN SEARCH -->
+        <div class="domain-search-container">
+          <link rel="stylesheet" type="text/css" href="https://secure.duoservers.com/tld-search/api-search.css?color=0a0f1e&width=100%" />
+          <script type="text/javascript" src="https://secure.duoservers.com/tld-search/api-search.js?store=store244290"></script>
+          <script type="text/javascript">
+            searchApiOptions = {
+              store: "store244290",
+              containerId: "domain-search-box",
+              submitURL: "",
+              selectedTld: "",
+              popupBox: true,
+              floatingBox: false
+            };
+          </script>
+          <div id="domain-search-box"></div>
         </div>
-
-        <h1 class="hero-title">
-          Search & secure your <span>primary domain</span>.
-        </h1>
-
-        <p class="hero-subtitle">
-          OpsLink Domains keeps your brands, services, and infrastructure on a stable foundation –
-          with clear pricing, clean DNS controls, and tight integration across the OpsLink stack.
-        </p>
-
-        <div class="hero-meta-row">
-          <div class="meta-pill">
-            <span class="meta-pill-dot"></span>
-            24/7 automated provisioning
-          </div>
-          <div class="meta-pill">
-            ICANN-aligned registry partners
-          </div>
-          <div class="meta-pill">
-            Backed by OpsLink Systems infrastructure
-          </div>
-        </div>
-
-        <div class="hero-actions">
-          <button class="btn-primary" type="button" onclick="document.getElementById('domain-input').focus()">
-            Start with a domain search
-          </button>
-          <a href="#pricing" class="meta-pill" style="border-color:rgba(148,163,184,0.7);">
-            View pricing overview
-          </a>
-        </div>
-
-        <p class="hero-footnote">
-          All prices in USD. Final amounts, renewals, and taxes are confirmed at checkout in your OpsLink Domains panel.
-        </p>
       </div>
 
-      <!-- DOMAIN SEARCH CARD -->
       <aside class="hero-card">
-        <div class="hero-card-inner">
-          <div class="hero-card-header">
-            <div>
-              <div class="hero-card-title">Domain search</div>
-              <div class="hero-card-sub">
-                Check availability and continue directly to registration using your OpsLink Domains account.
-              </div>
-            </div>
-            <div class="hero-card-tag">domains.opslinkcad.com</div>
-          </div>
-
-          <form class="domain-form" onsubmit="checkDomain(event)">
-            <div class="domain-input-wrap">
-              <span class="domain-input-icon">🌐</span>
-              <input
-                id="domain-input"
-                type="text"
-                placeholder="yourbrand.com"
-                autocomplete="off"
-              />
-            </div>
-            <button id="check-button" type="submit" class="btn-check">
-              Check
-            </button>
-          </form>
-
-          <div id="domain-status" class="domain-status status-neutral"></div>
-
-          <div class="domain-tlds">
-            <div class="tld-chip">
-              <span class="tld">.com</span>
-              <span class="price">$12.99/yr</span>
-            </div>
-            <div class="tld-chip">
-              <span class="tld">.net</span>
-              <span class="price">$13.99/yr</span>
-            </div>
-            <div class="tld-chip">
-              <span class="tld">.org</span>
-              <span class="price">$14.99/yr</span>
-            </div>
-            <div class="tld-chip">
-              <span class="tld">.io</span>
-              <span class="price">$39.99/yr</span>
-            </div>
-          </div>
-        </div>
+        <div class="hero-card-title">What OpsLink Domains provides</div>
+        <div class="hero-card-sub">A focused layer for domain registration, DNS policies, and integration across OpsLink services.</div>
+        <ul style="font-size:12px; line-height:1.6; color:var(--muted);">
+          <li>Centralized domain portfolio management.</li>
+          <li>DNS tools aligned with uptime and security.</li>
+          <li>Full integration with OpsLink Hosting and Systems.</li>
+        </ul>
       </aside>
-    </section>
-
-    <!-- PRICING PREVIEW -->
-    <section class="section" id="pricing">
-      <div class="section-header">
-        <h2 class="section-title">Pricing overview</h2>
-        <p class="section-subtitle">
-          Straightforward domain pricing across popular, modern, and premium namespaces. Use OpsLink Domains for a single
-          brand, or an entire client portfolio.
-        </p>
-      </div>
-
-      <div class="pricing-grid">
-        <article class="pricing-card">
-          <div class="pricing-pill">Most used</div>
-          <div class="pricing-name">Core TLDs</div>
-          <div class="pricing-price">
-            <span class="cur">from</span> $12.99<span class="cur">/yr</span>
-          </div>
-          <div class="pricing-note">
-            .com, .net, .org – dependable names for organizations, agencies, and long-term projects.
-          </div>
-        </article>
-
-        <article class="pricing-card">
-          <div class="pricing-pill" style="background:rgba(37,99,235,0.3);color:#dbeafe;">
-            For product teams
-          </div>
-          <div class="pricing-name">Modern namespaces</div>
-          <div class="pricing-price">
-            <span class="cur">from</span> $19.99<span class="cur">/yr</span>
-          </div>
-          <div class="pricing-note">
-            .dev, .app, .studio and more – ideal for SaaS, internal tools, and customer-facing apps.
-          </div>
-        </article>
-
-        <article class="pricing-card">
-          <div class="pricing-pill" style="background:rgba(22,163,74,0.25);color:#bbf7d0;">
-            Premium & geo
-          </div>
-          <div class="pricing-name">Specialized TLDs</div>
-          <div class="pricing-price">
-            <span class="cur">from</span> $39.99<span class="cur">/yr</span>
-          </div>
-          <div class="pricing-note">
-            .io, .gg, .cloud and other premium registries. Pricing varies by registry and availability tier.
-          </div>
-        </article>
-
-        <article class="pricing-card">
-          <div class="pricing-pill" style="background:rgba(148,163,184,0.22);color:#e5e7eb;">
-            Portfolio & corporate
-          </div>
-          <div class="pricing-name">Bulk & organization</div>
-          <div class="pricing-price">
-            <span class="cur">custom</span>
-          </div>
-          <div class="pricing-note">
-            For agencies and enterprises handling many domains, contact OpsLink Systems for structured rates.
-          </div>
-        </article>
-      </div>
-
-      <p style="font-size:11px;color:var(--muted);margin-top:10px;">
-        Pricing may adjust based on registry updates, currency, and promotions. Final values are always confirmed at checkout in your
-        OpsLink Domains or ResellersPanel client area.
-      </p>
     </section>
   </main>
 
   <footer>
     <div class="footer-inner">
-      <div>
-        © <span id="year"></span> OpsLink Systems. OpsLink Domains is part of the OpsLink platform.
-      </div>
+      <div>© <span id="year"></span> OpsLink Systems. OpsLink Domains is a division within the OpsLink platform.</div>
       <div class="footer-links">
-        <a href="https://opslinkcad.com" target="_blank">OpsLink Home</a>
         <a href="https://opslinkcad.com/legal.html" target="_blank">Legal</a>
         <a href="https://opslinkcad.com/privacy.html" target="_blank">Privacy</a>
         <a href="https://discord.gg/UF6Dt66phh" target="_blank">Support (Discord)</a>
@@ -801,53 +249,25 @@
     </div>
   </footer>
 
+  
   <script>
+    // Footer year
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    async function checkDomain(ev) {
-      ev.preventDefault();
+    // Simple logged-in state check for toggling auth vs client area
+    (function () {
+      const token = localStorage.getItem("opslinkDomainsUser");
+      const authButtons = document.getElementById("auth-buttons");
+      const clientArea = document.getElementById("client-area");
 
-      const input = document.getElementById("domain-input");
-      const statusEl = document.getElementById("domain-status");
-      const btn = document.getElementById("check-button");
-
-      const domain = (input.value || "").trim();
-
-      statusEl.className = "domain-status status-neutral";
-
-      if (!domain) {
-        statusEl.textContent = "Enter a domain name to check.";
-        return;
+      if (token) {
+        if (authButtons) authButtons.style.display = "none";
+        if (clientArea) clientArea.style.display = "inline-flex";
+      } else {
+        if (authButtons) authButtons.style.display = "flex";
+        if (clientArea) clientArea.style.display = "none";
       }
-
-      btn.disabled = true;
-      statusEl.textContent = `Checking availability for “${domain}”…`;
-
-      try {
-        const res = await fetch(`/api/check?domain=${encodeURIComponent(domain)}`);
-        const data = await res.json();
-
-        if (data.status === "available") {
-          statusEl.className = "domain-status status-ok";
-          statusEl.innerHTML =
-            `✅ <strong>${domain}</strong> is available. ` +
-            `<a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(domain)}" ` +
-            `style="color:#93c5fd;text-decoration:none;" target="_blank">Continue to registration ›</a>`;
-        } else if (data.status === "taken") {
-          statusEl.className = "domain-status status-bad";
-          statusEl.innerHTML = `❌ <strong>${domain}</strong> is already registered. Try another name or a different TLD.`;
-        } else {
-          statusEl.className = "domain-status status-neutral";
-          statusEl.textContent = "Could not confirm availability. If this continues, contact OpsLink support.";
-        }
-      } catch (err) {
-        console.error(err);
-        statusEl.className = "domain-status status-bad";
-        statusEl.textContent = "Error contacting the domain service. Please try again or contact support.";
-      } finally {
-        btn.disabled = false;
-      }
-    }
+    })();
   </script>
 </body>
 </html>

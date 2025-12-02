@@ -2,38 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OpsLink Domains – Professional Domain & DNS Management</title>
+  <title>OpsLink Domains – Secure Domain & DNS Management</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="OpsLink Domains provides secure, professional domain registration and DNS management for businesses, creators, and infrastructure teams. Powered by OpsLink Systems." />
+  <meta name="description" content="Register and manage domains with OpsLink Domains — powered by OpsLink Systems and ResellersPanel's global infrastructure." />
   <link rel="icon" href="https://opslinkcad.com/assets/OpsLinkLogo.png" />
 
   <style>
     :root {
-      --bg: #060b13;
-      --bg-soft: #0a111d;
-      --card: rgba(18,25,40,0.9);
-      --border: rgba(255,255,255,0.05);
-
+      --bg: #05080f;
       --accent: #4e8cff;
-      --accent-soft: #7fa4ff;
+      --accent2: #7fa4ff;
       --accent-green: #22c55e;
       --text: #e7ecf8;
-      --soft: #a7b3c9;
-
+      --soft: #9ca3af;
+      --card: rgba(12,18,32,0.9);
+      --border: rgba(255,255,255,0.08);
       --radius-lg: 18px;
-      --radius-sm: 999px;
-      --shadow: 0 12px 40px rgba(0,0,0,0.4);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: "Segoe UI", system-ui, sans-serif;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
 
     body {
-      background: radial-gradient(circle at 20% 20%, #0b1527, #05080f 80%);
+      background: radial-gradient(circle at 20% 20%, #0b1527, #05080f 85%);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
@@ -43,15 +33,15 @@
       position: sticky;
       top: 0;
       z-index: 10;
-      backdrop-filter: blur(18px);
-      background: rgba(5,8,15,0.75);
+      background: rgba(5,8,15,0.8);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
 
     .nav {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: auto;
-      padding: 18px 28px;
+      padding: 16px 26px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -66,42 +56,31 @@
     .logo {
       width: 38px;
       height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, #4e8cff, #6ea3ff);
+      border-radius: 10px;
+      background: linear-gradient(145deg, #4e8cff, #2563eb);
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
       font-weight: 800;
       font-size: 18px;
-      box-shadow: 0 0 12px rgba(78,140,255,0.6);
+      box-shadow: 0 0 12px rgba(78,140,255,0.5);
     }
 
-    .nav-title {
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
+    .nav-title { font-size: 17px; font-weight: 600; }
 
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      font-size: 14px;
-    }
+    .nav-links { display: flex; gap: 20px; font-size: 14px; }
 
     .nav-links a {
       color: var(--soft);
       text-decoration: none;
-      position: relative;
       transition: color .2s;
     }
 
-    .nav-links a:hover {
-      color: var(--accent);
-    }
+    .nav-links a:hover { color: var(--accent); }
 
     .btn {
-      border-radius: var(--radius-sm);
+      border-radius: 999px;
       font-size: 13px;
       padding: 9px 16px;
       border: none;
@@ -151,7 +130,7 @@
       border-radius: var(--radius-lg);
       border: 1px solid var(--border);
       padding: 24px 22px;
-      box-shadow: var(--shadow);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
     }
 
     .domain-card h3 {
@@ -178,12 +157,10 @@
       outline: none;
     }
 
-    .domain-form input::placeholder {
-      color: #6b7280;
-    }
+    .domain-form input::placeholder { color: #6b7280; }
 
     .domain-result {
-      margin-top: 12px;
+      margin-top: 14px;
       font-size: 13px;
       color: var(--soft);
       text-align: left;
@@ -195,7 +172,7 @@
       justify-content: center;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 16px;
+      margin-top: 18px;
     }
 
     .tld {
@@ -212,73 +189,21 @@
       font-weight: 500;
     }
 
-    .section {
-      max-width: 1000px;
-      margin: 80px auto;
-      padding: 0 28px;
-    }
-
-    .section h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    .section p {
-      color: var(--soft);
-      font-size: 14px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-    }
-
-    .price-card {
-      background: var(--card);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 20px;
-      text-align: left;
-      transition: transform .2s;
-    }
-
-    .price-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .price-card h3 {
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-
-    .price-card .price {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent-green);
-    }
-
-    .price-card p {
-      font-size: 13px;
-      color: var(--soft);
-      line-height: 1.5;
-    }
-
     footer {
-      border-top: 1px solid rgba(255,255,255,0.07);
-      padding: 26px 20px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 30px 20px;
       text-align: center;
       color: var(--soft);
       font-size: 12px;
       margin-top: 60px;
     }
 
+    footer a {
+      color: var(--accent2);
+      text-decoration: none;
+    }
+
     @media (max-width: 640px) {
-      .hero { margin-top: 60px; }
       .domain-form { flex-direction: column; }
       .domain-form button { width: 100%; }
     }
@@ -302,12 +227,12 @@
   </header>
 
   <section class="hero" id="search">
-    <h1>Professional Domain & DNS Management</h1>
-    <p>Register, renew, and manage your domains with ease — backed by OpsLink Systems infrastructure and global DNS performance.</p>
+    <h1>Search & Secure Your Domain</h1>
+    <p>OpsLink Domains gives you direct access to global registries, fast provisioning, and transparent pricing — all managed under your OpsLink account.</p>
 
     <div class="domain-card">
-      <h3>Search for your domain</h3>
-      <form class="domain-form" onsubmit="simulateSearch(event)">
+      <h3>Domain Search</h3>
+      <form class="domain-form" onsubmit="checkDomain(event)">
         <input id="domain-input" type="text" placeholder="yourbrand.com" />
         <button class="btn" type="submit">Check</button>
       </form>
@@ -322,64 +247,14 @@
     </div>
   </section>
 
-  <section class="section" id="pricing">
-    <h2>Transparent Pricing</h2>
-    <p>No hidden fees or surprise renewals — straightforward rates for every TLD.</p>
-
-    <div class="pricing-grid">
-      <div class="price-card">
-        <h3>Core TLDs</h3>
-        <div class="price">$12.99<span style="font-size:13px">/yr</span></div>
-        <p>.com, .net, .org – trusted, classic domains for businesses and professionals.</p>
-      </div>
-
-      <div class="price-card">
-        <h3>Modern Namespaces</h3>
-        <div class="price">$19.99<span style="font-size:13px">/yr</span></div>
-        <p>.app, .dev, .studio – perfect for SaaS, creators, and startups.</p>
-      </div>
-
-      <div class="price-card">
-        <h3>Premium & Specialty</h3>
-        <div class="price">$39.99<span style="font-size:13px">/yr</span></div>
-        <p>.io, .gg, .cloud and more – tailored for innovation and tech-forward brands.</p>
-      </div>
-
-      <div class="price-card">
-        <h3>Corporate & Bulk</h3>
-        <div class="price">Contact Us</div>
-        <p>Custom pricing for enterprises managing multiple brand domains.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="about">
-    <h2>Why OpsLink Domains</h2>
-    <p>Built for reliability, performance, and seamless OpsLink integration.</p>
-    <div class="pricing-grid">
-      <div class="price-card">
-        <h3>Reliable DNS</h3>
-        <p>Global anycast DNS for uptime-critical operations.</p>
-      </div>
-      <div class="price-card">
-        <h3>Security-First</h3>
-        <p>DNSSEC, registrar locks, and transparent renewal policies.</p>
-      </div>
-      <div class="price-card">
-        <h3>Unified Platform</h3>
-        <p>Integrate domains with OpsLink Hosting, Control Panels, and Infrastructure.</p>
-      </div>
-    </div>
-  </section>
-
   <footer>
-    © <span id="year"></span> OpsLink Systems – All rights reserved • <a href="https://discord.gg/UF6Dt66phh" style="color:#4e8cff;text-decoration:none;">Support</a>
+    © <span id="year"></span> OpsLink Systems • <a href="https://discord.gg/UF6Dt66phh">Support</a>
   </footer>
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    async function simulateSearch(ev) {
+    async function checkDomain(ev) {
       ev.preventDefault();
       const input = document.getElementById("domain-input");
       const status = document.getElementById("domain-status");
@@ -388,6 +263,7 @@
         status.textContent = "Please enter a domain name.";
         return;
       }
+
       status.textContent = `Checking availability for “${domain}”…`;
 
       try {
@@ -395,14 +271,15 @@
         const data = await res.json();
 
         if (data.status === "available") {
-          status.innerHTML = `✅ <strong>${domain}</strong> is available! <br><a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${domain}" target="_blank" style="color:#4e8cff;text-decoration:none;">Register now</a>`;
+          status.innerHTML = `✅ <strong>${domain}</strong> is available!<br>
+          <a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${domain}" target="_blank" style="color:#4e8cff;text-decoration:none;">Register now</a>`;
         } else if (data.status === "taken") {
           status.innerHTML = `❌ <strong>${domain}</strong> is already registered.`;
         } else {
-          status.innerHTML = `⚠️ Unable to verify domain. Please try again.`;
+          status.innerHTML = `⚠️ Could not confirm availability. Try again later.`;
         }
       } catch {
-        status.textContent = "Error connecting to domain API.";
+        status.textContent = "Error contacting domain service.";
       }
     }
   </script>

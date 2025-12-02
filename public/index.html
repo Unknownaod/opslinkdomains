@@ -355,7 +355,7 @@
       try {
         const full = `${name}.${tld}`;
         // Use the same API parameters as the official widget
-        const url = `https://secure.duoservers.com/tld-search/api-search.php?store=store244290&domain=${encodeURIComponent(full)}`;
+       const url = `../api/checkDomain?domain=${encodeURIComponent(full)}`;
         const resp = await fetch(url);
         const text = await resp.text();
 

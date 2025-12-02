@@ -23,21 +23,27 @@ export default async function handler(req) {
       headers: { "User-Agent": "OpsLinkDomainsChecker/1.0" },
     });
     const text = await resp.text();
-    const clean = text.toLowerCase();
 
+    // Debug log
+    console.log("ResellersPanel raw response:", text);
+
+    const clean = text.toLowerCase();
     let status = "unknown";
     if (clean.includes("available")) status = "available";
     else if (clean.includes("taken") || clean.includes("registered")) status = "taken";
     else if (clean.includes("<status>available</status>")) status = "available";
     else if (clean.includes("<status>taken</status>")) status = "taken";
 
-    return new Response(JSON.stringify({ status, raw: text }), {
-      status: 200,
-      headers: {
-        "content-type": "application/json",
-        "cache-control": "no-store, max-age=0",
-      },
-    });
+    return new Response(
+      JSON.stringify({ status, raw: text }),
+      {
+        status: 200,
+        headers: {
+          "content-type": "application/json",
+          "cache-control": "no-store, max-age=0",
+        },
+      }
+    );
   } catch (err) {
     console.error("API Error:", err);
     return new Response(

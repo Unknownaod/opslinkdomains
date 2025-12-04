@@ -7,11 +7,15 @@ import Domain from "@/models/Domain";
 const API = "https://www.namesilo.com/api";
 const KEY = process.env.NAMESILO_KEY;
 
-// Your Vercel nameservers
+// OPTIONAL — set these ONLY if you want to force Namesilo DNS
+// If using Vercel DNS, REMOVE the nameserver params completely
+const FORCE_NS = false; // Change to true if you want custom nameservers
 const NS = [
-  "dns1.p01.nsone.net",
-  "dns2.p01.nsone.net"
-]; // Replace if needed
+  "ns1.vercel-dns.com",
+  "ns2.vercel-dns.com"
+];
+
+export const runtime = "nodejs";
 
 export async function GET() {
   await connectDB();
@@ -21,42 +25,48 @@ export async function GET() {
     return NextResponse.json({ msg: "No pending domains" });
   }
 
+  const processed = [];
+
   for (const order of pendings) {
     for (const domain of order.domains) {
-      const registerUrl =
-        `${API}/domain/register?version=1&type=xml&key=${KEY}` +
-        `&domain=${domain}&years=1` +
-        `&nameserver=${NS[0]}&nameserver=${NS[1]}`;
+      let url =
+        `${API}/registerDomain?version=1&type=xml&key=${KEY}&domain=${domain}&years=1`;
 
-      const res = await fetch(registerUrl).then(r => r.text());
+      if (FORCE_NS) {
+        url += `&nameserver=${NS[0]}&nameserver=${NS[1]}`;
+      }
 
-      if (!res.includes("<code>300</code>")) {
-        console.log("Registration failed:", domain, res);
+      const xml = await fetch(url).then(r => r.text());
+
+      if (!xml.includes("<code>300</code>")) {
+        console.log("❌ FAILED:", domain);
+        console.log(xml);
+        processed.push({ domain, status: "FAILED" });
         continue;
       }
 
-      // Find expiration date
-      const expiration = res.match(/<expiration>(.*?)<\/expiration>/i)?.[1];
+      const expiration = xml.match(/<expiration>(.*?)<\/expiration>/i)?.[1] || null;
 
-      // Assign to user
-      await User.findByIdAndUpdate(order.userId, {
-        $push: { domains: domain },
-      });
+      // Assign to user profile
+      await User.findByIdAndUpdate(order.userId, { $push: { domains: domain } });
 
-      // Store domain record
+      // Save domain record
       await Domain.create({
         userId: order.userId,
         domain,
         createdAt: Date.now(),
-        expiresAt: expiration ? new Date(expiration).getTime() : null
+        expiresAt: expiration ? new Date(expiration).getTime() : null,
       });
 
-      console.log("Registered:", domain);
+      processed.push({ domain, status: "REGISTERED", expires: expiration });
+      console.log("🟢 REGISTERED:", domain);
     }
 
-    // Clear processed order
     await Pending.findByIdAndDelete(order._id);
   }
 
-  return NextResponse.json({ msg: "All pending domains processed" });
+  return NextResponse.json({
+    msg: "Pending domains processed",
+    results: processed
+  });
 }

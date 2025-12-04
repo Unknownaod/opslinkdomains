@@ -1,62 +1,75 @@
-// ✅ Vercel-style Universal Domain Search API
-// Uses Domainr's official public API (https://domainr.com/developer)
-// Automatically lists all TLDs, both taken + available
+export const config = {
+  runtime: "edge", // works perfectly on Vercel Edge
+};
 
-export default async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+// ✅ Global Domain Availability Search (Vercel-style)
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const query = searchParams.get("query");
 
-  if (req.method === "OPTIONS") return res.status(200).end();
-
-  const { query } = req.query;
   if (!query) {
-    return res.status(400).json({ error: "Missing ?query parameter" });
+    return new Response(
+      JSON.stringify({ error: "Missing ?query parameter" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   try {
-    const cleanQuery = query.trim().toLowerCase();
+    const search = query.trim().toLowerCase();
 
-    // Optional: Add your free Domainr developer key for higher rate limits
-    // Create one here: https://domainr.com/developer
+    // Use Domainr’s API (served by Fastly)
     const apiKey = process.env.DOMAINR_KEY || "";
+    const endpoint = `https://api.domainr.com/v2/search?query=${encodeURIComponent(
+      search
+    )}${apiKey ? `&key=${apiKey}` : ""}`;
 
-    // 🔍 Call Domainr official API (returns list of all possible TLDs)
-    const url = `https://api.domainr.com/v2/search?query=${encodeURIComponent(
-      cleanQuery
-    )}&location=us${apiKey ? `&key=${apiKey}` : ""}`;
-
-    const resp = await fetch(url, {
+    const resp = await fetch(endpoint, {
       headers: { Accept: "application/json" },
+      next: { revalidate: 60 }, // 1-minute edge cache
     });
 
     if (!resp.ok) {
-      throw new Error(`Domainr returned ${resp.status}`);
+      const text = await resp.text();
+      console.error("Domainr Error:", text);
+      throw new Error(`Domainr API ${resp.status}: ${text.slice(0, 120)}`);
     }
 
-    const data = await resp.json();
+    const json = await resp.json();
 
-    if (!data.results || data.results.length === 0) {
-      return res
-        .status(200)
-        .json({ query: cleanQuery, results: [], message: "No domains found" });
+    // Defensive check — handle malformed payloads
+    if (!json.results || !Array.isArray(json.results)) {
+      console.error("Bad Domainr response:", json);
+      return new Response(
+        JSON.stringify({
+          query: search,
+          results: [],
+          message: "Empty or invalid response from Domainr API.",
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    // 🧠 Map Domainr's response into simple frontend-ready data
-    const results = data.results.map((r) => ({
+    // Format for frontend
+    const results = json.results.map((r) => ({
       domain: r.domain,
-      availability: r.availability || "unknown", // 'available' | 'taken' | 'unavailable' | 'tld' | 'maybe'
+      availability: r.availability || "unknown",
       registerURL: `https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(
         r.domain
       )}`,
     }));
 
-    return res.status(200).json({ query: cleanQuery, results });
+    return new Response(
+      JSON.stringify({ query: search, results }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (err) {
-    console.error("Domainr error:", err);
-    res.status(500).json({
-      error: "Domain lookup failed",
-      details: err.message,
-    });
+    console.error("checkDomain.js error:", err);
+    return new Response(
+      JSON.stringify({
+        error: "Internal Server Error",
+        details: err.message,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

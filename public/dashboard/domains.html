@@ -21,22 +21,43 @@
 </div>
 
 <script>
-if (!localStorage.getItem("token")) window.location="/auth/login.html";
+if (!localStorage.getItem("token")) window.location = "/auth/login.html";
 
 async function loadDomains() {
-  const res = await fetch("/api/auth/me", {
+  const res = await fetch("/api/domains/list", {
     headers: { Authorization: localStorage.getItem("token") }
   });
-  const data = await res.json();
 
-  document.getElementById("domainList").innerHTML = data.domains.map(d =>
-    `<div class="domain-item">
-      ${d}
-      <button class="renew-btn">Renew</button>
-    </div>`
-  ).join("");
+  const data = await res.json();
+  const box = document.getElementById("domainList");
+
+  if (!data.domains?.length) {
+    box.innerHTML = "<p style='opacity:0.6'>You have no purchased domains yet.</p>";
+    return;
+  }
+
+  box.innerHTML = data.domains.map(d => `
+    <div class="domain-item">
+      ${d.domain}
+      <div>
+        <button class="renew-btn" onclick="manageDNS('${d.domain}')">Manage DNS</button>
+        <button class="renew-btn" style="background:#444" onclick="renew('${d.domain}')">Renew</button>
+      </div>
+    </div>
+  `).join("");
 }
+
+function manageDNS(domain) {
+  localStorage.setItem("dnsDomain", domain);
+  window.location = "/dashboard/dns.html";
+}
+
+function renew(domain) {
+  alert("Renewals coming in Phase 7 🚀");
+}
+
 loadDomains();
 </script>
+
 </body>
 </html>

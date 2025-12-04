@@ -1,13 +1,18 @@
-import Domain from "@/models/Domain";
-import { connectDB } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Domain from "@/models/Domain";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
-export async function GET(req) {
+export async function GET() {
   await connectDB();
-  const jwt = req.headers.get("authorization");
-  if (!jwt) return NextResponse.json({ error: "Missing token" }, { status: 401 });
 
-  const payload = JSON.parse(atob(jwt.split(".")[1]));
-  const domains = await Domain.find({ userId: payload.id });
-  return NextResponse.json(domains);
+  const token = cookies().get("token")?.value;
+  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+  const domains = await Domain.find({ userId: decoded.id });
+
+  return NextResponse.json({ domains });
 }

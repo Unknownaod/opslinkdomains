@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DNS Management — OpsLink Domains</title>
+  <style>
+    body { background:#050810; color:white; font-family:Segoe UI; margin:0; }
+    .container { max-width:1100px; margin:auto; padding:40px; }
+    input, select { padding:8px; border-radius:8px; border:1px solid #334155; margin-right:10px; }
+    .record { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(148,163,184,.3); }
+  </style>
+</head>
+<body>
+<script src="/dashboard/navbar.js"></script>
+
+<div class="container">
+  <h1>DNS Records</h1>
+  <select id="domainSelect"></select>
+
+  <div id="dnsRecords"></div>
+</div>
+</body>
+</html>

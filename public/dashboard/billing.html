@@ -5,6 +5,23 @@
   <style>
     body { background:#050810; color:white; font-family:Segoe UI; margin:0; }
     .container { max-width:1100px; margin:auto; padding:40px; }
+    .invoice {
+      display:flex;
+      justify-content:space-between;
+      padding:14px 0;
+      border-bottom:1px solid rgba(148,163,184,.25);
+      align-items:center;
+    }
+    .tag { opacity:.8; font-size:14px; }
+    button {
+      background:#2563eb;
+      padding:6px 14px;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      color:white;
+    }
+    .empty { opacity:.4; margin-top:20px; }
   </style>
 </head>
 <body>
@@ -12,8 +29,40 @@
 
 <div class="container">
   <h1>Billing History</h1>
-  <p>Stripe invoices will appear here.</p>
+  <div id="invoiceBox" class="empty">Loading invoices...</div>
 </div>
+
+<script>
+if (!localStorage.getItem("token")) {
+  window.location = "/auth/login.html";
+}
+
+async function loadInvoices() {
+  const r = await fetch("/api/payments/invoices", {
+    headers: { Authorization: localStorage.getItem("token") }
+  });
+  const data = await r.json();
+
+  if (!data.length) {
+    document.getElementById("invoiceBox").innerHTML =
+      "<p class='empty'>No billing records yet.</p>";
+    return;
+  }
+
+  document.getElementById("invoiceBox").innerHTML = data.map(inv => `
+    <div class="invoice">
+      <div>
+        <strong>${inv.domain}</strong><br>
+        <span class="tag">${new Date(inv.date).toLocaleString()}</span>
+      </div>
+      <strong>$${(inv.amount / 100).toFixed(2)}</strong>
+      <button onclick="window.open('${inv.url}', '_blank')">View Invoice</button>
+    </div>
+  `).join("");
+}
+
+loadInvoices();
+</script>
 
 </body>
 </html>

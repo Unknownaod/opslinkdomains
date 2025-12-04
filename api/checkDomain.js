@@ -1,6 +1,6 @@
-// ✅ Universal Domain Availability Check using Domainr API
-// Supports ALL TLDs (com, net, io, gg, xyz, etc.)
-// Works fully serverless on Vercel with zero CORS issues
+// ✅ Vercel-style Universal Domain Search API
+// Uses Domainr's official public API (https://domainr.com/developer)
+// Automatically lists all TLDs, both taken + available
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -15,47 +15,45 @@ export default async function handler(req, res) {
   }
 
   try {
-    const cleanDomain = query.trim().toLowerCase();
+    const cleanQuery = query.trim().toLowerCase();
 
-    // 🔍 Query Domainr public API
-    const resp = await fetch(
-      `https://api.domainsdb.info/v1/domains/search?domain=${encodeURIComponent(
-        cleanDomain
-      )}`
-    );
+    // Optional: Add your free Domainr developer key for higher rate limits
+    // Create one here: https://domainr.com/developer
+    const apiKey = process.env.DOMAINR_KEY || "";
+
+    // 🔍 Call Domainr official API (returns list of all possible TLDs)
+    const url = `https://api.domainr.com/v2/search?query=${encodeURIComponent(
+      cleanQuery
+    )}&location=us${apiKey ? `&key=${apiKey}` : ""}`;
+
+    const resp = await fetch(url, {
+      headers: { Accept: "application/json" },
+    });
 
     if (!resp.ok) {
-      throw new Error(`DomainsDB API returned ${resp.status}`);
+      throw new Error(`Domainr returned ${resp.status}`);
     }
 
     const data = await resp.json();
 
-    // Handle empty / invalid responses
-    if (!data.domains || data.domains.length === 0) {
-      return res.status(200).json({
-        domain: cleanDomain,
-        available: true,
-        message: "No existing registration found — domain appears available.",
-      });
+    if (!data.results || data.results.length === 0) {
+      return res
+        .status(200)
+        .json({ query: cleanQuery, results: [], message: "No domains found" });
     }
 
-    // Format results for multiple TLDs
-    const results = data.domains.map((d) => ({
-      domain: d.domain,
-      country: d.country || "Unknown",
-      isDead: d.isDead === "False" ? false : true,
-      create_date: d.create_date || null,
-      update_date: d.update_date || null,
+    // 🧠 Map Domainr's response into simple frontend-ready data
+    const results = data.results.map((r) => ({
+      domain: r.domain,
+      availability: r.availability || "unknown", // 'available' | 'taken' | 'unavailable' | 'tld' | 'maybe'
+      registerURL: `https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(
+        r.domain
+      )}`,
     }));
 
-    res.status(200).json({
-      query: cleanDomain,
-      available: false,
-      message: "One or more domains with this name exist.",
-      results,
-    });
+    return res.status(200).json({ query: cleanQuery, results });
   } catch (err) {
-    console.error("Error in checkDomain:", err);
+    console.error("Domainr error:", err);
     res.status(500).json({
       error: "Domain lookup failed",
       details: err.message,

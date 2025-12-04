@@ -9,11 +9,13 @@ const KEY = process.env.NAMESILO_KEY;
 
 // OPTIONAL — set these ONLY if you want to force Namesilo DNS
 // If using Vercel DNS, REMOVE the nameserver params completely
-const FORCE_NS = false; // Change to true if you want custom nameservers
+// NameSilo authoritative nameservers
 const NS = [
-  "ns1.vercel-dns.com",
-  "ns2.vercel-dns.com"
+  "ns1.namesilo.com",
+  "ns2.namesilo.com",
+  "ns3.namesilo.com"
 ];
+const FORCE_NS = true;
 
 export const runtime = "nodejs";
 

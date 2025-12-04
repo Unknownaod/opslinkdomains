@@ -1,51 +1,61 @@
 import fetch from "node-fetch";
-import { whois } from "@sonnyp/whois";
 
 const KEY = process.env.NAMESILO_KEY;
-const CHECK_API = "https://www.namesilo.com/api/checkRegisterAvailability";
+const API = "https://www.namesilo.com/api/checkRegisterAvailability";
 
 export default async function handler(req, res) {
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  const query = url.searchParams.get("domain") || url.searchParams.get("query");
+  try {
+    const url = new URL(req.url, `https://${req.headers.host}`);
+    const query = url.searchParams.get("domain") || url.searchParams.get("query");
 
-  if (!query) return res.status(400).json({ error: "Missing domain" });
+    if (!query) return res.status(400).json({ error: "Missing domain parameter" });
 
-  const base = query
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/\/.*/, "")
-    .split(".")[0];
+    const clean = query
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*/, "")
+      .trim();
 
-  const tlds = [
-    "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","store","shop",
-    "info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl","es","it","jp",
-    "br","mx","ru","be","cz","pt","sa","ae","sg","hk","ph","id","nz","ie","tr"
-  ];
+    const base = clean.split(".")[0];
 
-  async function check(fqdn) {
-    const checkURL = `${CHECK_API}?version=1&type=xml&key=${KEY}&domains=${fqdn}`;
+    const tlds = [
+      "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","store","shop",
+      "info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl","es","it","jp",
+      "br","mx","ru","be","cz","pt","sa","ae","sg","hk","ph","id","nz","ie","tr"
+    ];
 
-    try {
-      const xml = await fetch(checkURL).then(r => r.text());
-      const available = xml.includes(`<domain>${fqdn}</domain>`);
+    async function check(fqdn) {
+      try {
+        const checkURL = `${API}?version=1&type=xml&key=${KEY}&domains=${fqdn}`;
+        const xml = await fetch(checkURL).then(r => r.text());
 
-      if (available) return { domain: fqdn, available: true };
+        // NameSilo returns available domains ONLY inside <available_domains>
+        const available =
+          xml.includes("<available_domains>") &&
+          xml.includes(`<domain>${fqdn}</domain>`);
 
-      // WHOIS fallback for TAKEN domains
-      const whoisData = await whois(fqdn);
-      const taken = whoisData && !whoisData.toLowerCase().includes("no match");
-
-      return { domain: fqdn, available: !taken };
-    } catch (err) {
-      console.error("Error:", fqdn, err);
-      return { domain: fqdn, available: null };
+        return { domain: fqdn, available };
+      } catch (err) {
+        console.error("Error checking:", fqdn, err);
+        return { domain: fqdn, available: null };
+      }
     }
+
+    // Parallel lookup (fast)
+    const results = await Promise.all(tlds.map(t => check(`${base}.${t}`)));
+
+    // Sort so available domains appear first
+    results.sort((a, b) =>
+      a.available === b.available ? 0 : a.available ? -1 : 1
+    );
+
+    return res.status(200).json({
+      base,
+      count: results.length,
+      results
+    });
+  } catch (err) {
+    console.error("CHECKDOMAIN FAILED", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  const results = [];
-  for (let tld of tlds) results.push(await check(`${base}.${tld}`));
-
-  results.sort((a, b) => (a.available === b.available ? 0 : a.available ? -1 : 1));
-
-  return res.status(200).json({ base, count: results.length, results });
 }

@@ -1,75 +1,67 @@
 import { NextResponse } from "next/server";
+export const runtime = "nodejs";
 
-export const runtime = "nodejs"; // Needs Node for HTTPS requests (Edge too limited)
-
-// 🔑 Set your NameSilo API key in your Vercel Environment Variables
-// Example: NAMESILO_KEY=abcd1234...
-const NAME_SILO_API = "https://www.namesilo.com/api/checkRegisterAvailability";
 const API_KEY = process.env.NAMESILO_KEY;
+const NAME_SILO_API = "https://www.namesilo.com/api/checkRegisterAvailability";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
-  const query = searchParams.get("query") || searchParams.get("domain");
+  const domain = searchParams.get("query") || searchParams.get("domain");
 
-  if (!query) {
-    return NextResponse.json({ error: "Missing domain parameter" }, { status: 400 });
+  if (!domain) {
+    return NextResponse.json({ error: "Missing domain" }, { status: 400 });
   }
 
-  const clean = query
-    .trim()
+  const clean = domain
     .toLowerCase()
     .replace(/^https?:\/\//, "")
-    .replace(/\/.*$/, "")
-    .replace(/\s/g, "");
+    .replace(/\/.*/, "")
+    .trim();
 
   const base = clean.split(".")[0];
 
-  // ✅ List of major TLDs to check (can be expanded)
   const tlds = [
     "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","store","shop",
     "info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl","es","it","jp","br",
     "mx","ru","be","cz","pt","sa","ae","sg","hk","ph","id","nz","ie","tr"
   ];
 
-  // ✅ Helper: check NameSilo API for each TLD
   async function checkTld(tld: string) {
     const fqdn = `${base}.${tld}`;
 
-    const url = `${NAME_SILO_API}?version=1&type=xml&key=${API_KEY}&domains=${encodeURIComponent(fqdn)}`;
+    const url = `${NAME_SILO_API}?version=1&type=xml&key=${API_KEY}&domains=${fqdn}`;
 
     try {
       const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to reach NameSilo");
-
       const xml = await res.text();
 
-      // Parse simple XML for <available>yes/no
-      const available = /<available>yes<\/available>/i.test(xml);
-      return { domain: fqdn, tld, available };
-    } catch (err) {
-      console.error(`Error checking ${fqdn}:`, err);
-      return { domain: fqdn, tld, available: null, error: "Lookup failed" };
+      // A domain is available ONLY if it appears in <available_domains>
+      const isAvailable = new RegExp(`<domain>${fqdn}</domain>`, "i").test(xml);
+
+      return { domain: fqdn, available: isAvailable };
+    } catch (e: any) {
+      console.error("Lookup failed:", fqdn, e);
+      return { domain: fqdn, available: null, error: "Lookup failed" };
     }
   }
 
-  // Limit concurrency to avoid hitting NameSilo rate limit (max 10 req/sec)
   const concurrency = 10;
-  const results: any[] = [];
+  let results: any[] = [];
 
   for (let i = 0; i < tlds.length; i += concurrency) {
     const chunk = tlds.slice(i, i + concurrency);
     const partial = await Promise.all(chunk.map(checkTld));
-    results.push(...partial);
+    results = results.concat(partial);
   }
 
-  // Sort available first
-  const sorted = results.sort((a, b) =>
+  results.sort((a, b) =>
     a.available === b.available ? 0 : a.available ? -1 : 1
   );
 
   return NextResponse.json({
     base,
-    count: sorted.length,
-    results: sorted,
+    searched: clean,
+    count: results.length,
+    results,
   });
 }

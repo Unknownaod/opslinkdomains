@@ -2,286 +2,163 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OpsLink Domains – A Division of OpsLink Systems</title>
+  <title>OpsLink Domains — Secure Domains for Modern Businesses</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="OpsLink Domains, a division of OpsLink Systems — enterprise-grade domain & DNS management." />
+  <meta name="description" content="Register and manage domains securely with OpsLink Domains — modern tools for brands, businesses, and creators." />
   <link rel="icon" href="https://opslinkcad.com/assets/OpsLinkLogo.png" />
+
+  <!-- Typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg-main: #050810;
-      --bg-soft: #0b111c;
-      --glass: rgba(15, 23, 42, 0.65);
-      --border: rgba(148, 163, 184, 0.35);
-      --accent: #4e8cff;
-      --accent2: #2563eb;
-      --success: #22c55e;
-      --error: #ef4444;
-      --text-main: #e5e9f5;
-      --text-muted: #9ca3af;
-      --radius: 16px;
-      --radius-pill: 999px;
-      --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
+      --brand: #4E8CFF; /* OpsLink Blue */
+      --brand-dark: #2256d6;
+      --text: #0f172a;
+      --muted: #64748b;
+      --bg: #ffffff;
+      --radius: 14px;
+      --shadow: 0 8px 30px rgba(0,0,0,0.07);
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Inter",sans-serif}
+    body{background:var(--bg);color:var(--text);overflow-x:hidden}
 
-    body {
-      background:
-        radial-gradient(circle at 10% 0%, #0a1221 0, transparent 40%),
-        radial-gradient(circle at 100% 100%, #020617 0, transparent 55%),
-        var(--bg-main);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
+    /* NAVBAR */
+    nav{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:26px 9%;position:sticky;top:0;background:rgba(255,255,255,.75);
+      backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.06);z-index:30;
     }
+    .logo{font-weight:800;font-size:20px;letter-spacing:-.5px}
 
-    header {
-      position: sticky; top: 0; z-index: 20;
-      background: rgba(6,10,18,0.85);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
+    .nav-buttons{display:flex;gap:16px}
+    .btn{
+      padding:10px 20px;border-radius:999px;border:none;cursor:pointer;font-weight:600;
+      transition:.25s ease;font-size:14px;
     }
-    .nav {
-      max-width: 1200px; margin: 0 auto;
-      padding: 14px 28px;
-      display: flex; justify-content: space-between; align-items: center;
+    .btn-outline{
+      background:#fff;border:1px solid rgba(0,0,0,.12);
     }
-    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
-    .logo-mark {
-      width: 34px; height: 34px; border-radius: 10px;
-      background: linear-gradient(135deg,var(--accent),var(--accent2));
-      display: flex; justify-content: center; align-items: center;
-      color: #fff; font-weight: 800;
+    .btn-primary{
+      background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+      color:#fff;box-shadow:0 4px 20px rgba(78,140,255,.35);
     }
-    .btn-primary {
-      border-radius: var(--radius-pill);
-      padding: 9px 18px;
-      font-size: 13px; font-weight: 600;
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff; cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 0 14px rgba(37,99,235,0.55);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 25px rgba(37,99,235,0.75); }
+    .btn-primary:hover{transform:translateY(-2px)}
 
-    main.page {
-      flex: 1;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 60px 28px;
-      text-align: center;
+    /* HERO SECTION */
+    .hero{
+      text-align:center;padding:120px 20px 80px;position:relative;overflow:hidden;
+    }
+    .hero h1{
+      font-size:clamp(36px,5vw,64px);font-weight:800;margin-bottom:18px;
+      letter-spacing:-1.5px;line-height:1.1;
+    }
+    .hero p{
+      max-width:540px;margin:0 auto;font-size:17px;color:var(--muted);line-height:1.6;
     }
 
-    .hero-title {
-      font-size: clamp(34px, 4vw, 46px);
-      font-weight: 800;
-      margin-bottom: 16px;
-    }
-    .hero-title span {
-      background: linear-gradient(120deg, #93c5fd, var(--accent), #22c55e);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-    .hero-subtitle {
-      font-size: 15px;
-      color: var(--text-muted);
-      max-width: 550px;
-      margin: 0 auto 28px;
-      line-height: 1.6;
+    /* Gradient Waves */
+    .wave-bg{
+      position:absolute;inset:0;
+      background:radial-gradient(circle at 60% -10%, #bbd7ff 0, transparent 60%),
+                  radial-gradient(circle at -10% 80%, #e4efff 0, transparent 60%);
+      z-index:-1;
+      pointer-events:none;
     }
 
-    .domain-search-container {
-      margin-top: 28px;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 28px;
+    /* SEARCH CARD */
+    .search-container{
+      margin-top:50px;max-width:650px;background:#fff;padding:28px;
+      border-radius:var(--radius);box-shadow:var(--shadow);margin-left:auto;margin-right:auto;
+      border:1px solid rgba(0,0,0,.06);
+    }
+    .search-row{display:flex;gap:10px}
+    input{
+      flex:1;padding:16px;border-radius:var(--radius);
+      border:1px solid rgba(0,0,0,.12);font-size:16px;
+    }
+    input:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 4px rgba(78,140,255,.18)}
+
+    /* RESULTS */
+    .results{margin-top:24px;font-size:15px}
+    .item{
+      display:flex;justify-content:space-between;padding:12px 0;
+      border-bottom:1px solid rgba(0,0,0,.08);
+    }
+    .taken{color:#d62424;font-weight:600}
+    .free{color:#059669;font-weight:600}
+
+    /* FOOTER */
+    footer{
+      text-align:center;padding:45px 0;margin-top:100px;font-size:14px;
+      color:var(--muted);border-top:1px solid rgba(0,0,0,.05)
     }
 
-    .search-bar {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      align-items: center;
-    }
-    .search-bar input {
-      flex: 1;
-      padding: 13px 16px;
-      border-radius: var(--radius);
-      background: rgba(10,15,26,0.9);
-      border: 1px solid rgba(148,163,184,0.3);
-      color: var(--text-main);
-      font-size: 15px;
-      outline: none;
-      transition: border 0.3s, box-shadow 0.3s;
-    }
-    .search-bar input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 15px rgba(78,140,255,0.3);
-    }
-
-    .results-box {
-      margin-top: 25px;
-      text-align: left;
-    }
-    .result-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(148,163,184,0.25);
-      transition: 0.2s;
-    }
-    .result-item:hover { background: rgba(255,255,255,0.02); }
-
-    .result-name {
-      font-size: 15px; font-weight: 600;
-      display: flex; align-items: center; gap: 8px;
-    }
-
-    .result-status.available { color: var(--success); }
-    .result-status.taken { color: var(--error); }
-
-    .btn-register {
-      border-radius: var(--radius-pill);
-      border: none;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      padding: 6px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s ease;
-      text-decoration: none;
-    }
-    .btn-register:hover { opacity: 0.9; transform: scale(1.05); }
-
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-muted);
-      font-size: 14px;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-    @keyframes pulse {
-      0% { opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { opacity: 0.5; }
-    }
-
-    footer {
-      border-top: 1px solid rgba(148,163,184,0.3);
-      padding: 18px 24px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 12px;
+    @media(max-width:600px){
+      .search-row{flex-direction:column}
     }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="nav">
-      <div class="logo">
-        <div class="logo-mark">OD</div>
-        OpsLink Domains
-      </div>
-      <button class="btn-primary" onclick="window.location.href='/auth/login.html'">Login</button>
+
+<nav>
+  <div class="logo">OpsLink Domains</div>
+  <div class="nav-buttons">
+    <button class="btn btn-outline" onclick="location.href='/auth/login.html'">Login</button>
+    <button class="btn btn-primary" onclick="location.href='/auth/register.html'">Register</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wave-bg"></div>
+  <h1>Secure Domains for Modern Businesses.</h1>
+  <p>Find the perfect name for your brand in seconds — search, register, and manage domains with enterprise-grade infrastructure.</p>
+
+  <div class="search-container">
+    <div class="search-row">
+      <input id="domainInput" placeholder="Search for a domain, e.g. opslinkbrand" />
+      <button class="btn btn-primary" id="searchBtn">Search</button>
     </div>
-  </header>
+    <div id="results" class="results"></div>
+  </div>
+</section>
 
-  <main class="page">
-    <h1 class="hero-title">
-      Search across <span>every major domain extension</span> worldwide.
-    </h1>
-    <p class="hero-subtitle">
-      Instantly check availability across top TLDs and subdomains — powered by OpsLink Systems.
-    </p>
+<footer>
+  © <span id="year"></span> OpsLink Systems • All Rights Reserved
+</footer>
 
-    <div class="domain-search-container">
-      <div class="search-bar">
-        <input id="domainQuery" type="text" placeholder="Enter a name, e.g. soundwave" />
-        <button id="searchBtn" class="btn-primary">Search</button>
-      </div>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const input=document.getElementById("domainInput");
+const out=document.getElementById("results");
 
-      <div id="searchResults" class="results-box">
-        <p style="color: var(--text-muted); font-size: 13px;">Results will appear here.</p>
-      </div>
+async function performSearch(){
+  const q=input.value.trim().toLowerCase();
+  if(!q){out.innerHTML="Enter a domain to search.";return;}
+
+  out.innerHTML="Searching...";
+  const r=await fetch(`/api/checkDomain?domain=${q}`);
+  const data=await r.json();
+  out.innerHTML=data.results.map(i=>`
+    <div class="item">
+      <span>${i.domain}</span>
+      <span class="${i.available?'free':'taken'}">${i.available?'Available':'Taken'}</span>
+      ${i.available?`<button class="btn btn-primary" onclick="addToCart('${i.domain}')">Add to cart</button>`:''}
     </div>
-  </main>
+  `).join("");
+}
 
-  <footer>
-    © <span id="year"></span> OpsLink Systems • A division of OpsLink
-  </footer>
+function addToCart(domain){
+  const cart=JSON.parse(localStorage.getItem("cart")||"[]");
+  cart.push(domain);localStorage.setItem("cart",JSON.stringify(cart));
+  alert(domain+" added to cart.");
+}
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-    const searchBtn = document.getElementById("searchBtn");
-    const domainInput = document.getElementById("domainQuery");
-    const resultsEl = document.getElementById("searchResults");
+document.getElementById("searchBtn").onclick=performSearch;
+input.addEventListener("keypress",e=>e.key==="Enter"&&performSearch());
+</script>
 
-    async function performSearch() {
-      const term = domainInput.value.trim().toLowerCase();
-      if (!term) {
-        resultsEl.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Please enter a name.</p>';
-        return;
-      }
-
-      resultsEl.innerHTML = `<div class="loading">🔍 Searching <strong>${term}</strong> across all TLDs...</div>`;
-
-      try {
-        const resp = await fetch(`/api/checkDomain?domain=${encodeURIComponent(term)}`);
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { throw new Error("Invalid JSON"); }
-
-        if (!resp.ok) throw new Error(data.error || "Server error");
-        if (!data.results || data.results.length === 0) {
-          resultsEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;">No results found.</p>';
-          return;
-        }
-
-        const html = data.results.map(r => {
-          if (r.available === null) {
-            return `<div class="result-item"><div class="result-name">⚠️ ${r.domain}</div>
-                    <div class="result-status" style="color:var(--text-muted)">Error</div></div>`;
-          }
-
-          const taken = !r.available;
-          return `
-            <div class="result-item">
-              <div class="result-name">
-                ${taken ? '❌' : '✅'}
-                ${r.domain}
-              </div>
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div class="result-status ${taken ? 'taken' : 'available'}">
-                  ${taken ? 'Taken' : 'Available'}
-                </div>
-                ${!taken
-                  ? `<a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(r.domain)}" class="btn-register">Register</a>`
-                  : ""}
-              </div>
-            </div>`;
-        }).join("");
-
-        resultsEl.innerHTML = html;
-      } catch (err) {
-        console.error(err);
-        resultsEl.innerHTML = '<p style="color:var(--error);text-align:center;">Error fetching results. Please try again later.</p>';
-      }
-    }
-
-    searchBtn.addEventListener("click", performSearch);
-    domainInput.addEventListener("keypress", (e) => { if (e.key === "Enter") performSearch(); });
-  </script>
 </body>
 </html>

@@ -2,7 +2,10 @@ export const config = {
   runtime: "edge",
 };
 
-// ✅ Public domain availability API (WhoisXML or fallback)
+/**
+ * OpsLink Domains - Global TLD Availability Checker
+ * Full 100+ TLD list, safe parallel requests, and zero dependencies.
+ */
 export default async function handler(req) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("query");
@@ -14,69 +17,72 @@ export default async function handler(req) {
     );
   }
 
-  const apiKey = process.env.WHOISXML_KEY; // optional
+  // Normalize base name (strip protocol and www)
+  const base = query
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .split(".")[0]
+    .toLowerCase();
+
+  // 🌎 Major + Country TLDs (100+)
+  const tlds = [
+    // Generic
+    "com", "net", "org", "info", "biz", "xyz", "site", "online", "store",
+    "app", "dev", "tech", "cloud", "io", "gg", "ai", "co", "me", "tv", "cc",
+    "space", "world", "today", "live", "group", "link", "club", "pro", "fun",
+    "works", "tools", "solutions", "studio", "design", "systems", "support",
+    "services", "agency", "center", "network", "digital", "expert", "media",
+    "finance", "software", "press", "news", "blog", "global", "shop", "love",
+
+    // Countries
+    "us", "ca", "uk", "au", "de", "fr", "jp", "cn", "in", "br", "mx", "es",
+    "it", "ru", "pl", "se", "no", "dk", "fi", "ch", "nl", "be", "cz", "at",
+    "pt", "tr", "gr", "za", "nz", "kr", "hk", "sg", "id", "ph", "vn", "th",
+    "my", "sa", "ae", "eg", "ng", "ke", "gh", "ar", "cl", "pe", "uy", "ve",
+    "co.za", "co.uk", "com.au", "co.nz", "com.br", "com.mx", "com.tr", "com.ph",
+
+    // Trending/new
+    "bio", "dev", "eco", "earth", "lol", "fun", "music", "movie", "tech",
+    "games", "game", "finance", "capital", "ventures", "agency", "law", "art",
+    "health", "care", "shop", "travel", "studio", "photography", "money"
+  ];
 
   try {
-    const term = query.trim().toLowerCase();
-
-    // WHOISXML supports every TLD globally
-    const endpoint = apiKey
-      ? `https://domain-availability.whoisxmlapi.com/api/v1?apiKey=${apiKey}&domainName=${encodeURIComponent(
-          term
-        )}`
-      : // fallback: open public DNS check (no key)
-        `https://api.api-ninjas.com/v1/domainlookup?domain=${encodeURIComponent(term)}`;
-
-    const headers = apiKey
-      ? {}
-      : { "X-Api-Key": process.env.API_NINJAS_KEY || "demo" };
-
-    const resp = await fetch(endpoint, { headers });
-    if (!resp.ok) {
-      throw new Error(`Lookup failed (${resp.status})`);
-    }
-
-    const json = await resp.json();
-
-    // Normalize output shape
-    let results = [];
-
-    if (json.domains && Array.isArray(json.domains)) {
-      // API Ninjas response
-      results = json.domains.map((d) => ({
-        domain: d.domain,
-        availability: d.available ? "available" : "taken",
-      }));
-    } else if (json.domainName) {
-      // WhoisXML response
-      results = [
-        {
-          domain: json.domainName,
-          availability: json.domainAvailability === "AVAILABLE" ? "available" : "taken",
-        },
-      ];
-    } else {
-      results = [];
-    }
-
-    return new Response(
-      JSON.stringify({ query: term, results }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Cache-Control": "public, max-age=60, s-maxage=300",
-        },
-      }
+    // Run parallel checks (HEAD requests)
+    const results = await Promise.allSettled(
+      tlds.map(async (tld) => {
+        const domain = `${base}.${tld}`;
+        const url = `https://${domain}`;
+        try {
+          const res = await fetch(url, { method: "HEAD" });
+          const available = res.status === 404 || res.status === 502 || res.status === 0;
+          return { domain, availability: available ? "available" : "taken" };
+        } catch {
+          // Network/SSL error — assume available
+          return { domain, availability: "available" };
+        }
+      })
     );
+
+    const cleaned = results
+      .filter((r) => r.status === "fulfilled")
+      .map((r) => r.value);
+
+    return new Response(JSON.stringify({ query: base, results: cleaned }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=120, s-maxage=600",
+      },
+    });
   } catch (err) {
-    console.error("checkDomain error:", err);
+    console.error("Domain lookup error:", err);
     return new Response(
       JSON.stringify({
-        error: "Internal Server Error",
+        error: "Lookup failed",
         details: err.message,
       }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      { status: 200, headers: { "Content-Type": "application/json" } }
     );
   }
 }

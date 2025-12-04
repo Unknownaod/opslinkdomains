@@ -6,17 +6,109 @@
     body { background:#050810; color:white; font-family:Segoe UI; margin:0; }
     .container { max-width:1100px; margin:auto; padding:40px; }
     input, select { padding:8px; border-radius:8px; border:1px solid #334155; margin-right:10px; }
-    .record { display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid rgba(148,163,184,.3); }
+    .record-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px 0;
+      border-bottom:1px solid rgba(148,163,184,.3);
+    }
+    button { padding:6px 12px; border-radius:6px; cursor:pointer; }
+    .danger { background:#ef4444; color:white; border:none; }
+    .add-btn { background:#2563eb; color:white; border:none; }
   </style>
 </head>
 <body>
 <script src="/dashboard/navbar.js"></script>
 
 <div class="container">
-  <h1>DNS Records</h1>
+  <h1 id="domainTitle">DNS Records</h1>
+
   <select id="domainSelect"></select>
 
-  <div id="dnsRecords"></div>
+  <h3 style="margin-top:30px;">Records</h3>
+  <div id="dnsBox"></div>
+
+  <h3 style="margin-top:30px;">Add DNS Record</h3>
+  <input id="type" placeholder="Type (A, CNAME, TXT)">
+  <input id="host" placeholder="Host (@, www)">
+  <input id="value" placeholder="Value (IP/Target)">
+  <button class="add-btn" onclick="addRecord()">Add Record</button>
 </div>
+
+<script>
+let domain = localStorage.getItem("dnsDomain");
+
+if (!domain) {
+  alert("No domain selected!");
+  window.location = "/dashboard/domains.html";
+}
+
+document.getElementById("domainTitle").textContent = `DNS Management — ${domain}`;
+
+// populate dropdown if user has multiple domains
+async function loadDomains() {
+  const r = await fetch("/api/domains/list", {
+    headers: { Authorization: localStorage.getItem("token") }
+  });
+  const data = await r.json();
+  const select = document.getElementById("domainSelect");
+
+  select.innerHTML = data.domains.map(d =>
+    `<option ${d.domain === domain ? "selected" : ""}>${d.domain}</option>`
+  ).join("");
+
+  select.onchange = () => {
+    domain = select.value;
+    localStorage.setItem("dnsDomain", domain);
+    loadRecords();
+  };
+}
+
+async function loadRecords() {
+  const r = await fetch(`/api/dns/list?domain=${domain}`);
+  const records = await r.json();
+
+  document.getElementById("dnsBox").innerHTML = records.length
+    ? records.map(r => `
+      <div class="record-row">
+        <span>${r.type} ${r.host} → ${r.value}</span>
+        <button class="danger" onclick="delRecord('${r.record_id}')">Delete</button>
+      </div>
+    `).join("")
+    : "<p style='opacity:.6'>No DNS records found.</p>";
+}
+
+async function addRecord() {
+  const type = document.getElementById("type").value.trim();
+  const host = document.getElementById("host").value.trim();
+  const value = document.getElementById("value").value.trim();
+
+  if (!type || !host || !value) return alert("Please fill all fields.");
+
+  await fetch("/api/dns/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain, type, host, value })
+  });
+
+  loadRecords();
+}
+
+async function delRecord(id) {
+  await fetch("/api/dns/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain, record_id: id })
+  });
+
+  loadRecords();
+}
+
+// init
+loadDomains();
+loadRecords();
+</script>
+
 </body>
 </html>

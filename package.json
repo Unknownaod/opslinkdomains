@@ -1,16 +1,22 @@
 {
   "name": "opslink-domains",
   "version": "1.0.0",
-  "description": "OpsLink Domains – A Division of OpsLink Systems. Secure, enterprise-grade domain and DNS management platform.",
-  "main": "index.js",
+  "description": "OpsLink Domains — A Division of OpsLink Systems. Secure, enterprise-grade domain and DNS management platform.",
   "type": "module",
+  "private": true,
   "scripts": {
     "dev": "vercel dev",
-    "start": "node server.js",
-    "build": "echo 'Static build handled by Vercel'"
+    "build": "echo 'Build handled by Vercel'",
+    "start": "node server.js"
   },
   "dependencies": {
-    "node-fetch": "^3.3.2"
+    "mongoose": "^8.3.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "stripe": "^14.24.0",
+    "dotenv": "^16.5.0",
+    "cors": "^2.8.5",
+    "xml2js": "^0.6.2"
   },
   "engines": {
     "node": ">=18.0.0"

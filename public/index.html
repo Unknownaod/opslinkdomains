@@ -6,10 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="OpsLink Domains, a division of OpsLink Systems — enterprise-grade domain & DNS management." />
   <link rel="icon" href="https://opslinkcad.com/assets/OpsLinkLogo.png" />
+
   <style>
-    /* ================================
-       OPSLINK DOMAINS – 2025 Redesign
-       ================================ */
     :root {
       --bg-main: #050810;
       --bg-soft: #0b111c;
@@ -29,12 +27,15 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", system-ui, sans-serif; }
 
     body {
-      background: radial-gradient(circle at 10% 0%, #0a1221 0, transparent 40%), radial-gradient(circle at 100% 100%, #020617 0, transparent 55%), var(--bg-main);
+      background:
+        radial-gradient(circle at 10% 0%, #0a1221 0, transparent 40%),
+        radial-gradient(circle at 100% 100%, #020617 0, transparent 55%),
+        var(--bg-main);
       color: var(--text-main);
-      overflow-x: hidden;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow-x: hidden;
     }
 
     header {
@@ -48,16 +49,12 @@
       padding: 14px 28px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .logo {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 16px;
-    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
     .logo-mark {
-      width: 34px; height: 34px;
-      border-radius: 10px;
+      width: 34px; height: 34px; border-radius: 10px;
       background: linear-gradient(135deg,var(--accent),var(--accent2));
       display: flex; justify-content: center; align-items: center;
-      color: white; font-weight: 800;
+      color: #fff; font-weight: 800;
     }
     .btn-primary {
       border-radius: var(--radius-pill);
@@ -98,7 +95,6 @@
     }
 
     .domain-search-container {
-      margin: 0 auto;
       margin-top: 28px;
       background: var(--glass);
       border: 1px solid var(--border);
@@ -162,6 +158,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s ease;
+      text-decoration: none;
     }
     .btn-register:hover { opacity: 0.9; transform: scale(1.05); }
 
@@ -202,14 +199,19 @@
   </header>
 
   <main class="page">
-    <h1 class="hero-title">Search across <span>every domain extension</span> worldwide.</h1>
-    <p class="hero-subtitle">Instantly check availability across all major and emerging TLDs — powered by OpsLink Systems.</p>
+    <h1 class="hero-title">
+      Search across <span>every major domain extension</span> worldwide.
+    </h1>
+    <p class="hero-subtitle">
+      Instantly check availability across top TLDs and subdomains — powered by OpsLink Systems.
+    </p>
 
     <div class="domain-search-container">
       <div class="search-bar">
         <input id="domainQuery" type="text" placeholder="Enter a name, e.g. soundwave" />
         <button id="searchBtn" class="btn-primary">Search</button>
       </div>
+
       <div id="searchResults" class="results-box">
         <p style="color: var(--text-muted); font-size: 13px;">Results will appear here.</p>
       </div>
@@ -237,15 +239,23 @@
 
       try {
         const resp = await fetch(`/api/checkDomain?query=${encodeURIComponent(term)}`);
-        const data = await resp.json();
+        const text = await resp.text();
+        let data;
+        try { data = JSON.parse(text); } catch { throw new Error("Invalid JSON"); }
 
+        if (!resp.ok) throw new Error(data.error || "Server error");
         if (!data.results || data.results.length === 0) {
           resultsEl.innerHTML = '<p style="color:var(--text-muted);text-align:center;">No results found.</p>';
           return;
         }
 
         const html = data.results.map(r => {
-          const taken = r.availability !== 'available';
+          if (r.available === null) {
+            return `<div class="result-item"><div class="result-name">⚠️ ${r.domain}</div>
+                    <div class="result-status" style="color:var(--text-muted)">Error</div></div>`;
+          }
+
+          const taken = !r.available;
           return `
             <div class="result-item">
               <div class="result-name">
@@ -256,10 +266,12 @@
                 <div class="result-status ${taken ? 'taken' : 'available'}">
                   ${taken ? 'Taken' : 'Available'}
                 </div>
-                ${!taken ? `<a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(r.domain)}" class="btn-register">Register</a>` : ''}
+                ${!taken
+                  ? `<a href="https://domains.opslinkcad.com/cart.php?a=add&domain=register&query=${encodeURIComponent(r.domain)}" class="btn-register">Register</a>`
+                  : ""}
               </div>
             </div>`;
-        }).join('');
+        }).join("");
 
         resultsEl.innerHTML = html;
       } catch (err) {
@@ -269,9 +281,7 @@
     }
 
     searchBtn.addEventListener("click", performSearch);
-    domainInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") performSearch();
-    });
+    domainInput.addEventListener("keypress", (e) => { if (e.key === "Enter") performSearch(); });
   </script>
 </body>
 </html>

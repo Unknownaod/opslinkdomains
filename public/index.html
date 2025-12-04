@@ -238,7 +238,7 @@
       resultsEl.innerHTML = `<div class="loading">🔍 Searching <strong>${term}</strong> across all TLDs...</div>`;
 
       try {
-        const resp = await fetch(`/api/checkDomain?query=${encodeURIComponent(term)}`);
+        const resp = await fetch(`/api/check?domain=${encodeURIComponent(term)}`);
         const text = await resp.text();
         let data;
         try { data = JSON.parse(text); } catch { throw new Error("Invalid JSON"); }

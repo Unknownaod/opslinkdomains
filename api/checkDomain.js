@@ -1,72 +1,77 @@
-export const config = {
-  runtime: "nodejs",
-};
+// app/api/checkDomain/route.ts
+import { NextResponse } from "next/server";
 
-/**
- * OpsLink Domains - Global TLD Availability Checker
- * Node runtime version using HTTPS checks (works on Vercel)
- */
+export const runtime = "edge"; // or remove this if you prefer Node.js
 
-const TLD_LIST = [
-  "com","net","org","io","gg","ai","xyz","co","me","tv","app","dev","tech","store","site",
-  "us","ca","uk","au","de","fr","jp","cn","in","br","mx","es","it","ru","pl","se","no","fi","ch","nl","be",
-  "cz","at","pt","tr","gr","za","nz","kr","hk","sg","id","ph","vn","th","my","sa","ae","eg","ng","ke","gh",
-  "ar","cl","pe","uy","ve","co.za","co.uk","com.au","co.nz","com.br","com.mx","com.tr","com.ph",
-  "bio","eco","earth","fun","music","movie","finance","capital","ventures","agency","law",
-  "art","health","care","shop","travel","studio","design","systems","support","digital","press",
-  "gov","edu","mil","info","biz","pro","mobi","name","jobs","tel","asia","cat","coop","museum"
-];
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const raw = searchParams.get("domain");
 
-// Helper to quickly test if a domain resolves or not
-async function isDomainAvailable(domain) {
+  if (!raw) {
+    return NextResponse.json(
+      { error: "Missing domain parameter" },
+      { status: 400 }
+    );
+  }
+
+  // Normalize: strip protocol, path, spaces, uppercase, etc.
+  const domain = raw
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/\/.*$/, "");
+
+  // Google Public DNS JSON API
+  const dnsUrl = `https://dns.google/resolve?name=${encodeURIComponent(
+    domain
+  )}&type=A`;
+
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2000); // 2s timeout
-
-    const res = await fetch(`https://${domain}`, {
-      method: "HEAD",
-      signal: controller.signal,
+    const dnsRes = await fetch(dnsUrl, {
+      headers: { Accept: "application/dns-json" },
+      cache: "no-store",
     });
 
-    clearTimeout(timeout);
-    // If we get a valid HTTP response, assume taken
-    return res.status === 404 || res.status === 502 ? "available" : "taken";
-  } catch {
-    // Network or SSL error = likely available
-    return "available";
-  }
-}
+    if (!dnsRes.ok) {
+      return NextResponse.json(
+        {
+          domain,
+          available: null,
+          error: "DNS lookup failed",
+        },
+        { status: 502 }
+      );
+    }
 
-export default async function handler(req, res) {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const query = url.searchParams.get("query");
+    const data = await dnsRes.json();
 
-  if (!query) {
-    res.status(400).json({ error: "Missing ?query parameter" });
-    return;
-  }
+    // From Google DoH JSON:
+    // - "Status" === 3 → NXDOMAIN (no such domain)
+    // - "Answer" present with records → domain resolves
+    const status = data.Status;
+    const hasAnswers = Array.isArray(data.Answer) && data.Answer.length > 0;
 
-  const base = query
-    .replace(/^https?:\/\//, "")
-    .replace(/^www\./, "")
-    .split(".")[0]
-    .toLowerCase();
+    // If DNS says NXDOMAIN or there are no answers, we *assume* it's available
+    // Otherwise, we treat it as taken.
+    const available = status === 3 || !hasAnswers ? true : false;
 
-  const BATCH_SIZE = 20;
-  let results = [];
-
-  for (let i = 0; i < TLD_LIST.length; i += BATCH_SIZE) {
-    const batch = TLD_LIST.slice(i, i + BATCH_SIZE);
-    const batchResults = await Promise.all(
-      batch.map(async (tld) => {
-        const domain = `${base}.${tld}`;
-        const availability = await isDomainAvailable(domain);
-        return { domain, availability };
-      })
+    return NextResponse.json({
+      domain,
+      available,
+      debug: {
+        status,
+        hasAnswers,
+      },
+    });
+  } catch (err) {
+    console.error("Domain check error:", err);
+    return NextResponse.json(
+      {
+        domain,
+        available: null,
+        error: "Internal error while checking domain",
+      },
+      { status: 500 }
     );
-    results = results.concat(batchResults);
   }
-
-  res.setHeader("Cache-Control", "public, max-age=300, s-maxage=600");
-  res.status(200).json({ query: base, results });
 }

@@ -2,49 +2,68 @@ import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
 
 const KEY = process.env.NAMESILO_KEY;
-const API = "https://www.namesilo.com/api/checkRegisterAvailability";
+const TLD_API = "https://www.namesilo.com/api/listTlds";
+const CHECK_API = "https://www.namesilo.com/api/checkRegisterAvailability";
+
+let cachedTLDs = [];
+
+async function getTLDs() {
+  if (cachedTLDs.length) return cachedTLDs;
+
+  const url = `${TLD_API}?version=1&type=xml&key=${KEY}`;
+  const xml = await fetch(url).then(r => r.text());
+  const parsed = await parseStringPromise(xml);
+
+  cachedTLDs =
+    parsed?.namesilo?.reply?.tlds?.[0]?.tld?.map(t => t.toLowerCase()) || [];
+
+  return cachedTLDs;
+}
 
 export default async function handler(req, res) {
-  const url = new URL(req.url, `https://${req.headers.host}`);
-  const domain = url.searchParams.get("domain");
+  try {
+    const url = new URL(req.url, `https://${req.headers.host}`);
+    const domain = url.searchParams.get("domain");
 
-  if (!domain) return res.status(400).json({ error: "Missing domain" });
+    if (!domain) return res.status(400).json({ error: "Missing domain" });
 
-  const base = domain
-    .toLowerCase()
-    .replace(/^https?:\/\//, "")
-    .replace(/\/.*/, "")
-    .split(".")[0];
+    const base = domain
+      .toLowerCase()
+      .replace(/^https?:\/\//, "")
+      .replace(/\/.*/, "")
+      .split(".")[0];
 
-  const tlds = [
-    "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","store",
-    "shop","info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl",
-    "es","it","jp","br","mx","ru","be","cz","pt","sa","ae","sg","hk","ph",
-    "id","nz","ie","tr"
-  ];
+    const tlds = await getTLDs(); // 🔥 Dynamic, not static
 
-  async function check(fqdn) {
-    const url = `${API}?version=1&type=xml&key=${KEY}&domains=${fqdn}`;
-
-    try {
+    async function check(fqdn) {
+      const url = `${CHECK_API}?version=1&type=xml&key=${KEY}&domains=${fqdn}`;
       const xml = await fetch(url).then(r => r.text());
-      const data = await parseStringPromise(xml);
+      const parsed = await parseStringPromise(xml);
 
-      const available = data?.namesilo?.reply?.available_domains?.[0]?.domain?.includes(fqdn);
+      const available =
+        parsed?.namesilo?.reply?.available_domains?.[0]?.domain?.includes(fqdn);
+
       return { domain: fqdn, available: Boolean(available) };
-
-    } catch (err) {
-      console.error("ERROR checking:", fqdn, err);
-      return { domain: fqdn, available: null };
     }
+
+    // LIMIT INITIAL RESPONSE FOR PERFORMANCE
+    const first50Tlds = tlds.slice(0, 50);
+    const results = [];
+
+    for (const tld of first50Tlds) {
+      results.push(await check(`${base}.${tld}`));
+    }
+
+    return res.status(200).json({
+      base,
+      requested: domain,
+      totalTlds: tlds.length,
+      returned: results.length,
+      results
+    });
+
+  } catch (err) {
+    console.error("CHECKDOMAIN ERROR:", err);
+    return res.status(500).json({ error: "Server error" });
   }
-
-  const results = [];
-  for (const tld of tlds) results.push(await check(`${base}.${tld}`));
-
-  results.sort((a, b) =>
-    a.available === b.available ? 0 : a.available ? -1 : 1
-  );
-
-  return res.status(200).json({ base, count: results.length, results });
 }

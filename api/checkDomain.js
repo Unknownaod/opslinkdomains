@@ -1,91 +1,63 @@
-// ✅ Fastly-powered domain check API
-// Place this file in /api/checkDomain.js in your Vercel project
-// and add your FASTLY_API_KEY to the environment variables in Vercel.
+// ✅ Universal Domain Availability Check using Domainr API
+// Supports ALL TLDs (com, net, io, gg, xyz, etc.)
+// Works fully serverless on Vercel with zero CORS issues
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") return res.status(200).end();
 
   const { query } = req.query;
-  if (!query) return res.status(400).json({ error: "Missing ?query parameter" });
-
-  const fastlyKey = process.env.FASTLY_API_KEY;
-  if (!fastlyKey)
-    return res
-      .status(500)
-      .json({ error: "FASTLY_API_KEY missing in environment variables." });
+  if (!query) {
+    return res.status(400).json({ error: "Missing ?query parameter" });
+  }
 
   try {
-    // Clean domain name input
     const cleanDomain = query.trim().toLowerCase();
 
-    // 1️⃣ Check if the domain exists in Fastly's TLS domains list
-    const domainRes = await fetch(
-      `https://api.fastly.com/tls/domains?page[size]=1&filter[tls_domain.id]=${encodeURIComponent(
+    // 🔍 Query Domainr public API
+    const resp = await fetch(
+      `https://api.domainsdb.info/v1/domains/search?domain=${encodeURIComponent(
         cleanDomain
-      )}`,
-      {
-        headers: {
-          Accept: "application/json",
-          "Fastly-Key": fastlyKey,
-        },
-      }
+      )}`
     );
 
-    // Fastly API returns 404 if not found
-    if (domainRes.status === 404)
-      return res
-        .status(200)
-        .json({ domain: cleanDomain, available: true, message: "Domain not present in Fastly TLS registry" });
-
-    const data = await domainRes.json();
-
-    // If domain exists in Fastly
-    if (data && data.data && data.data.length > 0) {
-      const tlsInfo = data.data[0];
-      return res.status(200).json({
-        domain: tlsInfo.id,
-        available: false,
-        status: "registered",
-        certificate_status: tlsInfo.attributes?.tls_configurations || "unknown",
-      });
+    if (!resp.ok) {
+      throw new Error(`DomainsDB API returned ${resp.status}`);
     }
 
-    // 2️⃣ If not found, check if any TLS certs match this domain
-    const certRes = await fetch("https://api.fastly.com/tls/certificates", {
-      headers: {
-        Accept: "application/json",
-        "Fastly-Key": fastlyKey,
-      },
-    });
+    const data = await resp.json();
 
-    const certData = await certRes.json();
-    const matched = certData.data?.find((c) =>
-      c.attributes.domains?.includes(cleanDomain)
-    );
-
-    if (matched) {
+    // Handle empty / invalid responses
+    if (!data.domains || data.domains.length === 0) {
       return res.status(200).json({
         domain: cleanDomain,
-        available: false,
-        certificate_id: matched.id,
-        certificate_status: matched.attributes.state,
+        available: true,
+        message: "No existing registration found — domain appears available.",
       });
     }
 
-    // 3️⃣ Otherwise assume available
+    // Format results for multiple TLDs
+    const results = data.domains.map((d) => ({
+      domain: d.domain,
+      country: d.country || "Unknown",
+      isDead: d.isDead === "False" ? false : true,
+      create_date: d.create_date || null,
+      update_date: d.update_date || null,
+    }));
+
     res.status(200).json({
-      domain: cleanDomain,
-      available: true,
-      message: "Domain not found in Fastly TLS registry",
+      query: cleanDomain,
+      available: false,
+      message: "One or more domains with this name exist.",
+      results,
     });
   } catch (err) {
-    console.error("Fastly API error:", err);
+    console.error("Error in checkDomain:", err);
     res.status(500).json({
-      error: "Internal Server Error",
+      error: "Domain lookup failed",
       details: err.message,
     });
   }

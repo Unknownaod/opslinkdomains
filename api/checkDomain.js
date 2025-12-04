@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs"; // Needs Node for HTTPS requests (Edge too limited)
+
+// 🔑 Set your NameSilo API key in your Vercel Environment Variables
+// Example: NAMESILO_KEY=abcd1234...
+const NAME_SILO_API = "https://www.namesilo.com/api/checkRegisterAvailability";
+const API_KEY = process.env.NAMESILO_KEY;
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -10,7 +15,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing domain parameter" }, { status: 400 });
   }
 
-  // Clean & normalize
   const clean = query
     .trim()
     .toLowerCase()
@@ -18,59 +22,47 @@ export async function GET(req: Request) {
     .replace(/\/.*$/, "")
     .replace(/\s/g, "");
 
-  // Remove tld if present (soundwave.net → soundwave)
   const base = clean.split(".")[0];
 
-  // ✅ Popular & widely used TLDs (covers 95% of global domains)
+  // ✅ List of major TLDs to check (can be expanded)
   const tlds = [
-    "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","au","store","shop",
-    "info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl","pl","es","it","ch",
-    "no","se","dk","fi","jp","kr","cn","za","br","mx","ru","gr","be","at","cz","pt",
-    "sa","ae","sg","hk","ph","pk","id","nz","ie","il","ar","cl","tr","ng","qa","kw"
+    "com","net","org","co","io","xyz","dev","app","me","ca","us","uk","store","shop",
+    "info","biz","cloud","gg","tv","tech","ai","in","fr","de","nl","es","it","jp","br",
+    "mx","ru","be","cz","pt","sa","ae","sg","hk","ph","id","nz","ie","tr"
   ];
 
-  // ✅ Common subdomains that might resolve
-  const subdomains = ["", "www", "api", "panel", "shop", "blog", "portal"];
+  // ✅ Helper: check NameSilo API for each TLD
+  async function checkTld(tld: string) {
+    const fqdn = `${base}.${tld}`;
 
-  async function checkDomain(tld: string, sub: string) {
-    const fqdn = sub ? `${sub}.${base}.${tld}` : `${base}.${tld}`;
-    const url = `https://dns.google/resolve?name=${encodeURIComponent(fqdn)}&type=A`;
+    const url = `${NAME_SILO_API}?version=1&type=xml&key=${API_KEY}&domains=${encodeURIComponent(fqdn)}`;
 
     try {
-      const res = await fetch(url, {
-        headers: { Accept: "application/dns-json" },
-        cache: "no-store",
-      });
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error("Failed to reach NameSilo");
 
-      if (!res.ok) throw new Error("DNS query failed");
-      const data = await res.json();
+      const xml = await res.text();
 
-      const status = data.Status;
-      const hasAnswers = Array.isArray(data.Answer) && data.Answer.length > 0;
-      const available = status === 3 || !hasAnswers;
-
-      return { domain: fqdn, tld, subdomain: sub || null, available };
-    } catch {
-      return { domain: fqdn, tld, subdomain: sub || null, available: null };
+      // Parse simple XML for <available>yes/no
+      const available = /<available>yes<\/available>/i.test(xml);
+      return { domain: fqdn, tld, available };
+    } catch (err) {
+      console.error(`Error checking ${fqdn}:`, err);
+      return { domain: fqdn, tld, available: null, error: "Lookup failed" };
     }
   }
 
-  // Limit concurrency to keep under Edge timeouts
-  const concurrency = 20;
-  const tasks: any[] = [];
-
-  for (const tld of tlds) {
-    for (const sub of subdomains) tasks.push({ tld, sub });
-  }
-
+  // Limit concurrency to avoid hitting NameSilo rate limit (max 10 req/sec)
+  const concurrency = 10;
   const results: any[] = [];
-  for (let i = 0; i < tasks.length; i += concurrency) {
-    const chunk = tasks.slice(i, i + concurrency);
-    const part = await Promise.all(chunk.map((x) => checkDomain(x.tld, x.sub)));
-    results.push(...part);
+
+  for (let i = 0; i < tlds.length; i += concurrency) {
+    const chunk = tlds.slice(i, i + concurrency);
+    const partial = await Promise.all(chunk.map(checkTld));
+    results.push(...partial);
   }
 
-  // Sort with available ones first
+  // Sort available first
   const sorted = results.sort((a, b) =>
     a.available === b.available ? 0 : a.available ? -1 : 1
   );

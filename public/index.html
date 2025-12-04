@@ -135,53 +135,112 @@
 
 <script>
 document.getElementById("year").textContent = new Date().getFullYear();
-const input=document.getElementById("domainInput"), results=document.getElementById("results");
 
-/* CART BADGE */
-function updateCart(){
+const input = document.getElementById("domainInput");
+const results = document.getElementById("results");
+
+/* 🛒 CART BADGE */
+function updateCart() {
   const c = JSON.parse(localStorage.getItem("cart") || "[]");
   const el = document.getElementById("cartCount");
-  if(c.length){ el.textContent=c.length; el.style.display="inline-block"; }
+  if (el) {
+    if (c.length) {
+      el.textContent = c.length;
+      el.style.display = "inline-block";
+    } else {
+      el.style.display = "none";
+    }
+  }
 }
 updateCart();
 
-/* DOMAIN SEARCH */
-async function performSearch(){
+/* 🔍 DOMAIN SEARCH */
+async function performSearch() {
   let q = input.value.trim().toLowerCase();
-  if(!q){results.innerHTML="Enter a domain name.";return;}
+  if (!q) {
+    results.innerHTML = `<p class="muted">Enter a domain name.</p>`;
+    return;
+  }
 
-  if(!q.includes(".")) q += ".com"; // Auto-append .com
+  // If user typed "soundwave" instead of "soundwave.com"
+  q = q.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
+  const query = q.includes(".") ? q.split(".")[0] : q;
 
-  results.innerHTML="Checking availability...";
+  results.innerHTML = `<div class="loading">🔎 Checking availability for <strong>${query}</strong>...</div>`;
 
-  const r = await fetch(`/api/checkDomain?domain=${q}`);
-  const data = await r.json();
+  try {
+    const resp = await fetch(`/api/checkDomain?query=${encodeURIComponent(query)}`, {
+      cache: "no-store"
+    });
 
-  results.innerHTML = data.results.map(item => `
-    <div class="item">
-      <span>${item.domain}</span>
-      <span class="${item.available ? 'free' : 'taken'}">
-        ${item.available ? 'Available' : 'Taken'}
-      </span>
-      ${item.available ?
-        `<button class="btn btn-primary" onclick="addToCart('${item.domain}')">Add to Cart</button>`
-        : ''
+    const text = await resp.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Invalid JSON response from API");
+    }
+
+    if (!resp.ok || !data.results) {
+      throw new Error(data.error || "Failed to check domains");
+    }
+
+    if (data.results.length === 0) {
+      results.innerHTML = `<p class="muted">No domains found for "${query}".</p>`;
+      return;
+    }
+
+    // Build results list
+    const html = data.results.map(item => {
+      if (item.available === null) {
+        return `
+          <div class="item">
+            <span>${item.domain}</span>
+            <span class="error">Error</span>
+          </div>`;
       }
-    </div>
-  `).join("");
+
+      return `
+        <div class="item">
+          <span>${item.domain}</span>
+          <span class="${item.available ? "free" : "taken"}">
+            ${item.available ? "Available" : "Taken"}
+          </span>
+          ${
+            item.available
+              ? `<button class="btn btn-primary" onclick="addToCart('${item.domain}')">
+                  Add to Cart
+                </button>`
+              : ""
+          }
+        </div>`;
+    }).join("");
+
+    results.innerHTML = html;
+  } catch (err) {
+    console.error("Domain check failed:", err);
+    results.innerHTML = `<p class="error">❌ Unable to fetch availability. Please try again later.</p>`;
+  }
 }
 
-function addToCart(domain){
-  const cart = JSON.parse(localStorage.getItem("cart")||"[]");
-  if(!cart.includes(domain)) cart.push(domain);
-  localStorage.setItem("cart",JSON.stringify(cart));
-  updateCart();
-  alert(`${domain} added to cart.`);
+/* ➕ ADD TO CART */
+function addToCart(domain) {
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  if (!cart.includes(domain)) {
+    cart.push(domain);
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCart();
+    alert(`${domain} added to cart.`);
+  } else {
+    alert(`${domain} is already in your cart.`);
+  }
 }
 
+/* 🧭 EVENT HANDLERS */
 document.getElementById("searchBtn").onclick = performSearch;
-input.addEventListener("keypress", e => e.key==="Enter" && performSearch());
+input.addEventListener("keypress", e => e.key === "Enter" && performSearch());
 </script>
+
 
 </body>
 </html>
